@@ -261,7 +261,7 @@ function Footer() {
     <footer className="site-footer">
       <div className="shell site-footer__inner">
         <span className="brand">FreshFold</span>
-        <p>© 2024 Fresh-Fold Laundry Management. All rights reserved.</p>
+        <p>© 2026 Fresh-Fold Laundry Management. All rights reserved.</p>
       </div>
     </footer>
   )
