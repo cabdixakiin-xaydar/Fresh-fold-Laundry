@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fresh-Fold - Authentication</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-container": "#6e757c",
+                      "surface-container-high": "#e6e8ea",
+                      "tertiary-fixed-dim": "#c0c7cf",
+                      "tertiary-fixed": "#dce3eb",
+                      "primary": "#0058bc",
+                      "error": "#ba1a1a",
+                      "surface-tint": "#005bc1",
+                      "on-surface-variant": "#414755",
+                      "on-primary": "#ffffff",
+                      "on-tertiary-container": "#fcfcff",
+                      "on-surface": "#191c1e",
+                      "primary-fixed-dim": "#adc6ff",
+                      "inverse-primary": "#adc6ff",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed-variant": "#004493",
+                      "surface": "#f7f9fb",
+                      "secondary-fixed-dim": "#b8c8db",
+                      "tertiary": "#555d63",
+                      "surface-container-highest": "#e0e3e5",
+                      "surface-container": "#eceef0",
+                      "secondary": "#506071",
+                      "on-tertiary-fixed-variant": "#40484e",
+                      "on-primary-fixed": "#001a41",
+                      "on-secondary-container": "#566677",
+                      "surface-dim": "#d8dadc",
+                      "on-error-container": "#93000a",
+                      "error-container": "#ffdad6",
+                      "background": "#f7f9fb",
+                      "outline": "#717786",
+                      "secondary-container": "#d3e4f8",
+                      "outline-variant": "#c1c6d7",
+                      "on-error": "#ffffff",
+                      "primary-container": "#0070eb",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-fixed": "#151c22",
+                      "surface-variant": "#e0e3e5",
+                      "surface-bright": "#f7f9fb",
+                      "on-background": "#191c1e",
+                      "on-secondary-fixed-variant": "#394858",
+                      "surface-container-low": "#f2f4f6",
+                      "on-secondary": "#ffffff",
+                      "on-primary-container": "#fefcff",
+                      "primary-fixed": "#d8e2ff",
+                      "inverse-on-surface": "#eff1f3",
+                      "on-secondary-fixed": "#0c1d2b",
+                      "inverse-surface": "#2d3133",
+                      "secondary-fixed": "#d3e4f8"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "base": "4px",
+                      "lg": "24px",
+                      "margin-desktop": "40px",
+                      "xs": "4px",
+                      "sm": "8px",
+                      "margin-mobile": "16px",
+                      "xl": "32px",
+                      "md": "16px",
+                      "gutter": "20px"
+              },
+              "fontFamily": {
+                      "label-sm": ["Hanken Grotesk"],
+                      "display-lg": ["Hanken Grotesk"],
+                      "label-md": ["Hanken Grotesk"],
+                      "headline-lg-mobile": ["Hanken Grotesk"],
+                      "body-lg": ["Hanken Grotesk"],
+                      "headline-md": ["Hanken Grotesk"],
+                      "headline-lg": ["Hanken Grotesk"],
+                      "body-md": ["Hanken Grotesk"]
+              },
+              "fontSize": {
+                      "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body { font-family: 'Hanken Grotesk', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex items-center justify-center p-margin-mobile md:p-margin-desktop">
+<!-- Suppressed Shell Components for Transactional Screen -->
+<!-- The TopAppBar and SideNavBar are intentionally excluded here as this is a linear/transactional login screen, adhering to the "Automatic Suppression" rule in the Shared Components Logic. -->
+<main class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 bg-surface-container-lowest rounded-xl shadow-[0_24px_48px_-12px_rgba(0,0,0,0.05)] overflow-hidden border border-surface-variant">
+<!-- Left Side: Branding / Visual Anchor -->
+<div class="hidden md:flex flex-col justify-between bg-primary-container p-xl relative overflow-hidden group">
+<div class="absolute inset-0 z-0 opacity-20 transition-transform duration-700 group-hover:scale-105" data-alt="A macro shot of crisp, freshly folded white linens stacked neatly in a pristine, bright industrial laundry facility. The lighting is cool, clinical, and even, highlighting the texture of the fabric. The overall mood is sterile, clean, and highly organized, reflecting a professional operation. Dominant colors are stark whites and very subtle cool blue shadows." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBUzP0os-sf14FbRF9hYp38EbISx9v3rNcwcrWRaNv47opi3zCBZwowsoc6Yw6fd5xtLd6YnovUw1hnB1FBdrtu0n3kguzRc6lJQ-o1xO1Ycs5n504Zp5xpCIZ7TQx0QSqW9BJWNA1eBWISlYSZj_Xjs2w1uzx4aLIKhzu1HmrI3EeuvaJ6pWmlY7uP8DfDkGE3ZhYj5jMj7smnDIKqMX7bGXWo3YvxN71JxhSioDPxjfekw6beBrLYFuS3LlcDPD78D9xWc1H0J5k'); background-size: cover; background-position: center;">
+</div>
+<div class="relative z-10 flex items-center gap-sm">
+<span class="material-symbols-outlined text-on-primary-container" style="font-size: 32px; font-variation-settings: 'FILL' 1;">local_laundry_service</span>
+<h1 class="font-headline-lg text-headline-lg text-on-primary-container m-0">Fresh-Fold</h1>
+</div>
+<div class="relative z-10 mt-auto">
+<h2 class="font-display-lg text-display-lg text-on-primary-container mb-md">Operational Excellence.</h2>
+<p class="font-body-lg text-body-lg text-on-primary-container/80 max-w-sm">Secure access to your laundry management hub. Ensure precision in every order.</p>
+</div>
+</div>
+<!-- Right Side: Auth Form -->
+<div class="p-xl flex flex-col justify-center bg-surface-container-lowest">
+<div class="mb-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-xs">Welcome Back</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Sign in to manage your operations.</p>
+</div>
+<!-- Role Selection Toggle -->
+<div class="flex bg-surface-container p-base rounded-DEFAULT mb-lg w-full max-w-sm border border-outline-variant">
+<button class="flex-1 py-sm px-md text-center rounded-sm bg-surface-container-lowest shadow-sm border border-outline-variant text-primary font-label-md text-label-md transition-all duration-150">
+                    Staff / Admin
+                </button>
+<button class="flex-1 py-sm px-md text-center rounded-sm text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-low transition-colors duration-150">
+                    Customer
+                </button>
+</div>
+<!-- Auth Mode Toggle (Login vs Create) - Simulated visually -->
+<div class="flex gap-md mb-xl border-b border-outline-variant pb-xs">
+<button class="font-label-md text-label-md text-primary border-b-2 border-primary pb-sm transition-all">Log In</button>
+<button class="font-label-md text-label-md text-on-surface-variant pb-sm hover:text-on-surface transition-colors">Create Account</button>
+</div>
+<form class="flex flex-col gap-md">
+<!-- Input Group: Email -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-sm text-label-sm text-on-surface" for="email">Email Address</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline" style="font-size: 20px;">mail</span>
+<input class="w-full pl-xl pr-md py-md bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" id="email" placeholder="operator@freshfold.com" type="email"/>
+</div>
+</div>
+<!-- Input Group: Password -->
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-center">
+<label class="font-label-sm text-label-sm text-on-surface" for="password">Password</label>
+<a class="font-label-sm text-label-sm text-primary hover:underline" href="#">Forgot password?</a>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline" style="font-size: 20px;">lock</span>
+<input class="w-full pl-xl pr-md py-md bg-surface border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" id="password" placeholder="••••••••" type="password"/>
+<button class="absolute right-md top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined" style="font-size: 20px;">visibility_off</span>
+</button>
+</div>
+</div>
+<!-- Primary Action -->
+<button class="w-full py-md px-lg bg-primary text-on-primary font-label-md text-label-md rounded-DEFAULT hover:bg-surface-tint active:scale-[0.98] transition-all duration-150 mt-sm flex items-center justify-center gap-sm" type="submit">
+                    Access Dashboard
+                    <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
+</button>
+</form>
+<!-- Divider -->
+<div class="flex items-center gap-md my-lg">
+<div class="h-px bg-outline-variant flex-1"></div>
+<span class="font-label-sm text-label-sm text-outline">or continue with</span>
+<div class="h-px bg-outline-variant flex-1"></div>
+</div>
+<!-- Social/SSO Logins -->
+<div class="grid grid-cols-2 gap-md">
+<button class="flex items-center justify-center gap-sm py-sm px-md border border-outline-variant rounded-DEFAULT hover:bg-surface-container-low transition-colors duration-150 font-label-md text-label-md text-on-surface">
+<img alt="Google" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBS0jxldXFyiLKe1JAqAy2mgDrUwVfHTFjGBQSFmnrTI2IvI0A7TAm4v93zrMOdsPNfIlLuo7ni2oNri5ieoeu0ILb1X63xDG1c3mAxxq2jCsg8OUBp_wIlPHSslJtnZs1FDsNY8CWpr6KUZOjHZTu2fmX70I0UbvuHqtAOkqF_UwxUUcVlEgzA_P05CYq8Cv_V16jgEDP8nF2Sp5k1RDSsd6K-BjCC99ZrdeqKfsJ5UlxQLMkPzjzVJDBdbVHzhXo-XbTlK2nsiZ8"/>
+                    Google
+                </button>
+<button class="flex items-center justify-center gap-sm py-sm px-md border border-outline-variant rounded-DEFAULT hover:bg-surface-container-low transition-colors duration-150 font-label-md text-label-md text-on-surface">
+<img alt="Microsoft" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9gQ_dJ5f_7nHAdya74diI9Mto7Iq8ig5WAfv9R1Zwv_kv7yD1Lv1AZFibjdUa6uRaoU-uqeCnxvYZTkTRKbvyWhoZtUisEIEx6maVUtk0BhGEFya44vepds_g_tQmqJb0vy9f5d-JVOg_c5zrOGvZPlAoH6e1UoHek7YkvyheOFWcKPuT2ezyciDxg8ZK7nyzjAsr-lDV0YhdVpACZLR87T1Ap7zh8WiO7QHTwF1V8ZwYrhZshuUMvF76KxQuHVrQvZhUC8HRg-c"/>
+                    Microsoft
+                </button>
+</div>
+</div>
+</main>
+</body></html>

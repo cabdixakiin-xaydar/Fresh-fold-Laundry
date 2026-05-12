@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fresh-Fold - Inventory Tracker</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#e0e3e5",
+                        "on-error": "#ffffff",
+                        "primary-container": "#0070eb",
+                        "surface": "#f7f9fb",
+                        "tertiary-fixed": "#dce3eb",
+                        "secondary-fixed-dim": "#b8c8db",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#adc6ff",
+                        "on-secondary-container": "#566677",
+                        "on-tertiary-container": "#fcfcff",
+                        "on-tertiary-fixed": "#151c22",
+                        "on-primary-fixed": "#001a41",
+                        "inverse-surface": "#2d3133",
+                        "primary": "#0058bc",
+                        "primary-fixed-dim": "#adc6ff",
+                        "surface-bright": "#f7f9fb",
+                        "on-primary-container": "#fefcff",
+                        "surface-container-low": "#f2f4f6",
+                        "on-secondary-fixed": "#0c1d2b",
+                        "surface-tint": "#005bc1",
+                        "on-background": "#191c1e",
+                        "on-tertiary-fixed-variant": "#40484e",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#d8dadc",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#414755",
+                        "secondary": "#506071",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#d8e2ff",
+                        "secondary-fixed": "#d3e4f8",
+                        "inverse-on-surface": "#eff1f3",
+                        "outline": "#717786",
+                        "secondary-container": "#d3e4f8",
+                        "surface-container": "#eceef0",
+                        "tertiary-fixed-dim": "#c0c7cf",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary": "#555d63",
+                        "error-container": "#ffdad6",
+                        "background": "#f7f9fb",
+                        "tertiary-container": "#6e757c",
+                        "on-secondary-fixed-variant": "#394858",
+                        "surface-container-high": "#e6e8ea",
+                        "outline-variant": "#c1c6d7",
+                        "on-primary-fixed-variant": "#004493",
+                        "on-surface": "#191c1e",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "margin-mobile": "16px",
+                        "xs": "4px",
+                        "gutter": "20px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "margin-desktop": "40px",
+                        "base": "4px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "label-sm": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "label-md": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Hanken Grotesk', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="bg-surface-container-lowest dark:bg-surface-container-low border-r border-outline-variant dark:border-outline flex flex-col h-screen w-64 left-0 top-0 fixed z-40 hidden md:flex p-md gap-sm">
+<div class="flex items-center gap-sm mb-lg">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" data-icon="local_laundry_service" style="font-variation-settings: 'FILL' 1;">local_laundry_service</span>
+<div>
+<div class="font-headline-md text-primary dark:text-primary-fixed-dim font-bold">Fresh-Fold</div>
+<div class="font-label-sm text-secondary dark:text-secondary-fixed-dim">Laundry Management</div>
+</div>
+</div>
+<button class="bg-primary text-on-primary hover:bg-surface-tint transition-colors duration-150 rounded-lg py-sm px-md font-label-md w-full mb-md flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+            Create New Order
+        </button>
+<div class="flex flex-col gap-xs flex-grow">
+<a class="flex items-center gap-sm px-md py-sm text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-lg transition-all duration-150 font-label-md text-label-md focus:ring-2 focus:ring-primary/10" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Executive Dashboard
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-lg transition-all duration-150 font-label-md text-label-md focus:ring-2 focus:ring-primary/10" href="#">
+<span class="material-symbols-outlined" data-icon="local_laundry_service">local_laundry_service</span>
+                Order Hub
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-lg transition-all duration-150 font-label-md text-label-md focus:ring-2 focus:ring-primary/10" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+                Customer Directory
+            </a>
+<a class="flex items-center gap-sm px-md py-sm bg-primary-container text-on-primary-container dark:bg-primary-fixed-dim dark:text-on-primary-fixed-variant rounded-lg font-bold transition-all duration-150 font-label-md text-label-md focus:ring-2 focus:ring-primary/10" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+                Inventory Tracker
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-lg transition-all duration-150 font-label-md text-label-md focus:ring-2 focus:ring-primary/10" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+                Billing &amp; Invoices
+            </a>
+</div>
+<div class="flex flex-col gap-xs mt-auto pt-md border-t border-outline-variant dark:border-outline">
+<a class="flex items-center gap-sm px-md py-sm text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-lg transition-all duration-150 font-label-md text-label-md focus:ring-2 focus:ring-primary/10" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+<a class="flex items-center gap-sm px-md py-sm text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-lg transition-all duration-150 font-label-md text-label-md focus:ring-2 focus:ring-primary/10" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+                Support
+            </a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col min-h-screen md:ml-64">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-background border-b border-outline-variant dark:border-outline full-width top-0 z-50 flex justify-between items-center w-full px-margin-desktop h-16">
+<div class="flex items-center gap-md">
+<button class="md:hidden text-on-surface-variant hover:bg-surface-container-low transition-colors duration-150 p-sm rounded-full">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<div class="font-headline-md text-primary dark:text-primary-fixed-dim font-bold tracking-tight md:hidden">Fresh-Fold</div>
+<div class="hidden md:flex items-center relative">
+<span class="material-symbols-outlined absolute left-sm text-on-surface-variant" data-icon="search">search</span>
+<input class="pl-[36px] pr-sm py-sm rounded-full border border-outline-variant bg-surface-container-lowest text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all w-64" placeholder="Search inventory..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<button class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors duration-150 p-sm rounded-full scale-100 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors duration-150 p-sm rounded-full scale-100 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<button class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors duration-150 p-sm rounded-full scale-100 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Page Content -->
+<div class="p-margin-desktop flex-grow flex flex-col gap-lg">
+<!-- Page Header -->
+<div class="flex justify-between items-end">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-xs">Inventory &amp; Supplies</h1>
+<p class="font-body-md text-body-md text-secondary">Monitor stock levels, manage suppliers, and record usage.</p>
+</div>
+<button class="bg-primary text-on-primary hover:bg-surface-tint transition-colors duration-150 rounded-lg py-sm px-md font-label-md flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]" data-icon="edit_document">edit_document</span>
+                    Record Stock Usage
+                </button>
+</div>
+<!-- Alerts Section -->
+<div class="bg-error-container border border-error/20 rounded-xl p-md flex items-start gap-md">
+<span class="material-symbols-outlined text-error" data-icon="warning">warning</span>
+<div>
+<h3 class="font-label-md text-label-md text-on-error-container font-bold mb-xs">Low Stock Alerts (2)</h3>
+<p class="font-body-md text-body-md text-on-error-container">Premium Liquid Detergent and Stain Remover #4 are below minimum threshold levels. Reordering is recommended immediately.</p>
+</div>
+<button class="ml-auto text-error font-label-md text-label-md hover:underline">Review &amp; Order</button>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-md">
+<!-- Main Inventory Table (Spans 2 columns) -->
+<div class="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden flex flex-col">
+<div class="p-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low/50">
+<h2 class="font-headline-md text-headline-md text-on-surface">Current Stock Levels</h2>
+<div class="flex gap-sm">
+<button class="text-secondary hover:text-primary transition-colors p-xs"><span class="material-symbols-outlined" data-icon="filter_list">filter_list</span></button>
+<button class="text-secondary hover:text-primary transition-colors p-xs"><span class="material-symbols-outlined" data-icon="more_vert">more_vert</span></button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant bg-surface">
+<th class="p-sm pl-md font-label-sm text-label-sm text-secondary uppercase tracking-wider">Item Name</th>
+<th class="p-sm font-label-sm text-label-sm text-secondary uppercase tracking-wider">Category</th>
+<th class="p-sm font-label-sm text-label-sm text-secondary uppercase tracking-wider">Stock</th>
+<th class="p-sm font-label-sm text-label-sm text-secondary uppercase tracking-wider">Unit</th>
+<th class="p-sm font-label-sm text-label-sm text-secondary uppercase tracking-wider">Status</th>
+<th class="p-sm pr-md"></th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md text-on-surface">
+<!-- Row 1 - Low Stock -->
+<tr class="border-b border-outline-variant/50 hover:bg-primary/5 transition-colors group">
+<td class="p-sm pl-md font-medium">Premium Liquid Detergent</td>
+<td class="p-sm text-secondary">Chemicals</td>
+<td class="p-sm font-bold text-error">12</td>
+<td class="p-sm text-secondary">Gallons</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm">
+                                            Low Stock
+                                        </span>
+</td>
+<td class="p-sm pr-md text-right">
+<button class="text-secondary hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-[18px]" data-icon="add_shopping_cart">add_shopping_cart</span></button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant/50 hover:bg-primary/5 transition-colors group">
+<td class="p-sm pl-md font-medium">Fabric Softener - Floral</td>
+<td class="p-sm text-secondary">Chemicals</td>
+<td class="p-sm">45</td>
+<td class="p-sm text-secondary">Gallons</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm">
+                                            In Stock
+                                        </span>
+</td>
+<td class="p-sm pr-md text-right">
+<button class="text-secondary hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-[18px]" data-icon="add_shopping_cart">add_shopping_cart</span></button>
+</td>
+</tr>
+<!-- Row 3 - Low Stock -->
+<tr class="border-b border-outline-variant/50 hover:bg-primary/5 transition-colors group">
+<td class="p-sm pl-md font-medium">Stain Remover #4</td>
+<td class="p-sm text-secondary">Chemicals</td>
+<td class="p-sm font-bold text-error">3</td>
+<td class="p-sm text-secondary">Liters</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm">
+                                            Low Stock
+                                        </span>
+</td>
+<td class="p-sm pr-md text-right">
+<button class="text-secondary hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-[18px]" data-icon="add_shopping_cart">add_shopping_cart</span></button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="border-b border-outline-variant/50 hover:bg-primary/5 transition-colors group">
+<td class="p-sm pl-md font-medium">Standard Hangers</td>
+<td class="p-sm text-secondary">Packaging</td>
+<td class="p-sm">1250</td>
+<td class="p-sm text-secondary">Pieces</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm">
+                                            In Stock
+                                        </span>
+</td>
+<td class="p-sm pr-md text-right">
+<button class="text-secondary hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-[18px]" data-icon="add_shopping_cart">add_shopping_cart</span></button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-primary/5 transition-colors group">
+<td class="p-sm pl-md font-medium">Garment Bags (Large)</td>
+<td class="p-sm text-secondary">Packaging</td>
+<td class="p-sm">800</td>
+<td class="p-sm text-secondary">Pieces</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm">
+                                            In Stock
+                                        </span>
+</td>
+<td class="p-sm pr-md text-right">
+<button class="text-secondary hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined text-[18px]" data-icon="add_shopping_cart">add_shopping_cart</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Right Column: Suppliers & Quick Stats -->
+<div class="flex flex-col gap-md">
+<!-- Supplier Management -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md">
+<div class="flex justify-between items-center mb-md">
+<h2 class="font-headline-md text-headline-md text-on-surface">Top Suppliers</h2>
+<button class="text-primary font-label-md text-label-md hover:underline">Manage</button>
+</div>
+<div class="flex flex-col gap-sm">
+<div class="flex items-center justify-between p-sm border border-outline-variant/50 rounded-lg hover:border-primary/30 transition-colors cursor-pointer">
+<div>
+<div class="font-label-md text-label-md text-on-surface">ChemCorp Industries</div>
+<div class="font-body-md text-[13px] text-secondary">Detergents &amp; Softeners</div>
+</div>
+<span class="material-symbols-outlined text-secondary" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-sm border border-outline-variant/50 rounded-lg hover:border-primary/30 transition-colors cursor-pointer">
+<div>
+<div class="font-label-md text-label-md text-on-surface">PackRight Solutions</div>
+<div class="font-body-md text-[13px] text-secondary">Hangers &amp; Bags</div>
+</div>
+<span class="material-symbols-outlined text-secondary" data-icon="chevron_right">chevron_right</span>
+</div>
+<button class="mt-xs w-full py-2 border border-dashed border-outline text-secondary font-label-md text-label-md rounded-lg hover:bg-surface-container-low transition-colors flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span> Add Supplier
+                            </button>
+</div>
+</div>
+<!-- Usage Stats Card -->
+<div class="bg-primary-container text-on-primary-container rounded-xl p-md relative overflow-hidden">
+<!-- Abstract Background element -->
+<div class="absolute -right-8 -top-8 w-32 h-32 bg-primary-fixed-dim/20 rounded-full blur-2xl"></div>
+<h2 class="font-headline-md text-headline-md mb-sm relative z-10">Weekly Usage</h2>
+<div class="flex justify-between items-end relative z-10">
+<div>
+<div class="font-display-lg text-display-lg leading-none mb-xs">142</div>
+<div class="font-body-md text-body-md opacity-80">Gallons of Chemicals</div>
+</div>
+<div class="bg-on-primary-container text-primary-container px-2 py-1 rounded font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span> +5%
+                            </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

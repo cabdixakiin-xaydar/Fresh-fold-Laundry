@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fresh-Fold Delivery Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-container": "#6e757c",
+                      "surface-container-high": "#e6e8ea",
+                      "tertiary-fixed-dim": "#c0c7cf",
+                      "tertiary-fixed": "#dce3eb",
+                      "primary": "#0058bc",
+                      "error": "#ba1a1a",
+                      "surface-tint": "#005bc1",
+                      "on-surface-variant": "#414755",
+                      "on-primary": "#ffffff",
+                      "on-tertiary-container": "#fcfcff",
+                      "on-surface": "#191c1e",
+                      "primary-fixed-dim": "#adc6ff",
+                      "inverse-primary": "#adc6ff",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed-variant": "#004493",
+                      "surface": "#f7f9fb",
+                      "secondary-fixed-dim": "#b8c8db",
+                      "tertiary": "#555d63",
+                      "surface-container-highest": "#e0e3e5",
+                      "surface-container": "#eceef0",
+                      "secondary": "#506071",
+                      "on-tertiary-fixed-variant": "#40484e",
+                      "on-primary-fixed": "#001a41",
+                      "on-secondary-container": "#566677",
+                      "surface-dim": "#d8dadc",
+                      "on-error-container": "#93000a",
+                      "error-container": "#ffdad6",
+                      "background": "#f7f9fb",
+                      "outline": "#717786",
+                      "secondary-container": "#d3e4f8",
+                      "outline-variant": "#c1c6d7",
+                      "on-error": "#ffffff",
+                      "primary-container": "#0070eb",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-fixed": "#151c22",
+                      "surface-variant": "#e0e3e5",
+                      "surface-bright": "#f7f9fb",
+                      "on-background": "#191c1e",
+                      "on-secondary-fixed-variant": "#394858",
+                      "surface-container-low": "#f2f4f6",
+                      "on-secondary": "#ffffff",
+                      "on-primary-container": "#fefcff",
+                      "primary-fixed": "#d8e2ff",
+                      "inverse-on-surface": "#eff1f3",
+                      "on-secondary-fixed": "#0c1d2b",
+                      "inverse-surface": "#2d3133",
+                      "secondary-fixed": "#d3e4f8"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "base": "4px",
+                      "lg": "24px",
+                      "margin-desktop": "40px",
+                      "xs": "4px",
+                      "sm": "8px",
+                      "margin-mobile": "16px",
+                      "xl": "32px",
+                      "md": "16px",
+                      "gutter": "20px"
+              },
+              "fontFamily": {
+                      "label-sm": [
+                              "Hanken Grotesk"
+                      ],
+                      "display-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "label-md": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-lg-mobile": [
+                              "Hanken Grotesk"
+                      ],
+                      "body-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-md": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "body-md": [
+                              "Hanken Grotesk"
+                      ]
+              },
+              "fontSize": {
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.background'); color: theme('colors.on-background'); }
+        .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border: 1px solid theme('colors.outline-variant'); }
+        .ambient-shadow { box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.05); }
+        .focus-glow:focus-within { box-shadow: 0 0 0 2px rgba(0, 88, 188, 0.1); border-color: theme('colors.primary'); }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden bg-background font-body-md">
+<!-- SideNavBar -->
+<nav class="bg-surface-container-lowest border-r border-outline-variant h-screen w-64 left-0 top-0 flex flex-col p-md gap-sm hidden md:flex shrink-0">
+<div class="mb-lg">
+<h1 class="font-headline-md text-primary font-bold">Fresh-Fold</h1>
+<p class="font-label-sm text-on-surface-variant">Laundry Management</p>
+</div>
+<button class="bg-primary text-on-primary font-label-md py-sm px-md rounded hover:bg-surface-tint transition-colors duration-150 mb-md w-full flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined">add</span>
+            Create New Order
+        </button>
+<ul class="flex flex-col gap-xs flex-1">
+<li>
+<a class="flex items-center gap-sm px-md py-sm text-secondary hover:bg-surface-container-high rounded-lg transition-all duration-150 font-label-md" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                    Executive Dashboard
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-md py-sm text-secondary hover:bg-surface-container-high rounded-lg transition-all duration-150 font-label-md" href="#">
+<span class="material-symbols-outlined">local_laundry_service</span>
+                    Order Hub
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-md py-sm text-secondary hover:bg-surface-container-high rounded-lg transition-all duration-150 font-label-md" href="#">
+<span class="material-symbols-outlined">group</span>
+                    Customer Directory
+                </a>
+</li>
+<li>
+<!-- Semantic Match: Delivery Management fits best under a fleet/inventory or dashboard context, but let's highlight an intent for Logistics/Delivery. We will use a custom highlight or assume Inventory Tracker for fleet. Let's highlight Inventory Tracker for logistics intent -->
+<a class="flex items-center gap-sm px-md py-sm bg-primary-container text-on-primary-container rounded-lg font-bold transition-all duration-150 font-label-md" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+                    Inventory Tracker
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-md py-sm text-secondary hover:bg-surface-container-high rounded-lg transition-all duration-150 font-label-md" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+                    Billing &amp; Invoices
+                </a>
+</li>
+</ul>
+<div class="mt-auto border-t border-outline-variant pt-sm">
+<ul class="flex flex-col gap-xs">
+<li>
+<a class="flex items-center gap-sm px-md py-sm text-secondary hover:bg-surface-container-high rounded-lg transition-all duration-150 font-label-md" href="#">
+<span class="material-symbols-outlined">settings</span>
+                        Settings
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-md py-sm text-secondary hover:bg-surface-container-high rounded-lg transition-all duration-150 font-label-md" href="#">
+<span class="material-symbols-outlined">contact_support</span>
+                        Support
+                    </a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col h-screen overflow-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface border-b border-outline-variant full-width top-0 z-50 flex justify-between items-center px-margin-desktop h-16 shrink-0 md:hidden">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">menu</span>
+<h1 class="font-headline-md text-primary font-bold tracking-tight">Fresh-Fold</h1>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-low transition-colors duration-150 p-xs rounded-full cursor-pointer scale-100 active:scale-95">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-low transition-colors duration-150 p-xs rounded-full cursor-pointer scale-100 active:scale-95">account_circle</span>
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-1 overflow-y-auto p-margin-desktop flex flex-col gap-lg bg-background">
+<!-- Header Section -->
+<div class="flex justify-between items-end">
+<div>
+<h2 class="font-headline-lg text-on-background">Delivery Management</h2>
+<p class="font-body-md text-on-surface-variant mt-xs">Optimize routes and assign drivers for active orders.</p>
+</div>
+<div class="flex gap-sm">
+<div class="relative focus-glow rounded bg-surface-container-lowest border border-outline-variant flex items-center px-sm py-xs">
+<span class="material-symbols-outlined text-on-surface-variant text-sm mr-xs">filter_list</span>
+<select class="bg-transparent border-none text-on-surface-variant font-label-md focus:ring-0 cursor-pointer">
+<option>All Statuses</option>
+<option>Out for Delivery</option>
+<option>Completed</option>
+</select>
+</div>
+<button class="bg-surface-container-lowest border border-outline-variant text-on-surface-variant font-label-md py-xs px-md rounded hover:bg-surface-container-low transition-colors duration-150 flex items-center gap-xs">
+<span class="material-symbols-outlined">route</span>
+                        Optimize Routes
+                    </button>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-gutter h-[calc(100vh-160px)] min-h-[600px]">
+<!-- Map Area (Spans 8 columns on desktop) -->
+<div class="col-span-12 lg:col-span-8 rounded-xl overflow-hidden glass-panel ambient-shadow relative flex flex-col">
+<div class="absolute top-md left-md z-10 glass-panel rounded px-sm py-xs flex gap-sm items-center shadow-sm">
+<span class="w-3 h-3 rounded-full bg-primary block"></span>
+<span class="font-label-sm text-on-surface">3 Active Drivers</span>
+</div>
+<!-- Placeholder Map Image -->
+<div class="w-full flex-1 bg-surface-container-high bg-cover bg-center" data-alt="A clean, modern, high-tech stylized city map interface showing active delivery routes. The map uses a sterile, light-mode aesthetic with very pale gray and white street grids. Distinct bright blue lines indicate optimal driving routes, and small blue circular markers with white icons denote delivery vans. The overall lighting is bright and even, conveying a sense of operational efficiency and precision control typical of high-end logistics software." data-location="New York City" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCZgqzYoEOaKl7mHcf8CZwN71Z1kAMJKbTI2JpnsroVxbwnK-PhEa1nDfFazoMrcrsNHuMNGsAjc0wl48FkbjMXBhYMJrrq6G2C0mOQV8B6x8SGFoc2PoBff-WZqbHuwXmQ4qyxn5ftP53iLErenU640u7LiLN3JMZxTY2ELuO4YrBLnaMCUZIwpNIkt1o6UUq-grM9CQRF0heJmyFMTrQAfoI_I37KynvHgSZZ-uB_jTUwhIr_neCtiiqrSGyFbLpxjkcjZO7BQ-k');">
+</div>
+</div>
+<!-- Logistics Panel (Spans 4 columns) -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-md h-full">
+<!-- Pending Pickups/Deliveries List -->
+<div class="glass-panel rounded-xl flex-1 ambient-shadow flex flex-col overflow-hidden">
+<div class="p-md border-b border-outline-variant bg-surface-container-lowest">
+<h3 class="font-headline-md text-on-surface">Queue</h3>
+</div>
+<div class="overflow-y-auto p-sm flex flex-col gap-xs flex-1">
+<!-- Order Item -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-sm flex flex-col gap-sm hover:bg-surface-container-low transition-colors">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-label-md text-on-surface block">#ORD-9821</span>
+<span class="font-label-sm text-on-surface-variant block">124 Main St, Suite 4B</span>
+</div>
+<span class="bg-error-container text-on-error-container font-label-sm px-2 py-1 rounded">Pickup</span>
+</div>
+<div class="flex justify-between items-center mt-xs">
+<span class="font-label-sm text-secondary">Assign Driver</span>
+<div class="flex gap-xs">
+<div class="w-6 h-6 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center cursor-pointer hover:bg-primary-container hover:text-on-primary-container transition-colors"><span class="material-symbols-outlined text-[14px]">person_add</span></div>
+</div>
+</div>
+</div>
+<!-- Order Item -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-sm flex flex-col gap-sm hover:bg-surface-container-low transition-colors">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-label-md text-on-surface block">#ORD-9818</span>
+<span class="font-label-sm text-on-surface-variant block">880 West End Ave</span>
+</div>
+<span class="bg-secondary-container text-on-secondary-container font-label-sm px-2 py-1 rounded">Delivery</span>
+</div>
+<div class="flex justify-between items-center mt-xs">
+<div class="flex items-center gap-xs">
+<div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-on-primary font-label-sm">JD</div>
+<span class="font-label-sm text-on-surface">John D.</span>
+</div>
+<span class="font-label-sm text-primary">In Transit</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Driver Stats -->
+<div class="glass-panel rounded-xl p-md ambient-shadow shrink-0">
+<h3 class="font-label-md text-on-surface-variant mb-md">Fleet Status</h3>
+<div class="grid grid-cols-2 gap-sm">
+<div class="bg-surface-container-lowest p-sm border border-outline-variant rounded">
+<span class="font-display-lg text-primary block">12</span>
+<span class="font-label-sm text-secondary">Completed</span>
+</div>
+<div class="bg-surface-container-lowest p-sm border border-outline-variant rounded">
+<span class="font-display-lg text-secondary block">4</span>
+<span class="font-label-sm text-secondary">In Progress</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

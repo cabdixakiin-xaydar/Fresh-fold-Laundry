@@ -1,0 +1,50 @@
+# Fresh-Fold Laundry Management System - Requirements Specification
+
+## 1. Overview
+Automate and streamline laundry business operations, including customers, orders, billing, inventory, and employees.
+
+## 2. Customer Management
+- Register, update, and remove customers.
+- Store contact details (name, phone, address).
+- Transaction history and preferences.
+- Loyalty programs and discounts.
+
+## 3. Order Management
+- Unique order IDs.
+- Multiple items per order.
+- Service types: Washing, Dry Cleaning, Ironing.
+- Special instructions (delicate fabrics, stain removal).
+- Real-time status: Received, Processing, Ready, Delivered.
+
+## 4. Pricing and Billing
+- Charges by item count or weight.
+- Automatic total calculation.
+- Invoices/receipts generation.
+- Supports discounts, taxes, and promos.
+- Payment status tracking (Paid, Partial, Unpaid).
+
+## 5. Inventory Management
+- Track supplies (detergents, chemicals).
+- Low stock alerts.
+- Supplier/vendor management.
+
+## 6. Employee Management
+- Staff accounts and roles (Admin, Cashier, Worker).
+- Performance tracking, attendance, and shift schedules.
+
+## 7. Pickup & Delivery
+- Scheduling, driver assignment, and status tracking.
+- Route optimization.
+
+## 8. Reporting & Analytics
+- Sales reports (Daily, Weekly, Monthly).
+- Customer activity and financial health tracking (Profit/Expenses).
+- Service popularity insights.
+
+## 9. Security
+- Secure login and Role-Based Access Control (RBAC).
+- Data encryption and backups.
+
+## 10. Dashboard
+- Centralized overview of KPIs (Total orders, revenue, pending tasks).
+- Quick actions for common operations.
