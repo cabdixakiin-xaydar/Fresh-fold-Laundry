@@ -328,7 +328,7 @@ export function OrderDetailPage() {
   }
 
   async function onViewReceiptPdf() {
-    if (!invoice) return
+    if (!invoice || invoice.payment_status !== 'paid') return
     setBillingError(null)
     try {
       const blob = await billingService.downloadReceiptPdf(invoice.id)
@@ -339,7 +339,7 @@ export function OrderDetailPage() {
   }
 
   async function onPrintReceiptPdf() {
-    if (!invoice) return
+    if (!invoice || invoice.payment_status !== 'paid') return
     setBillingError(null)
     try {
       const blob = await billingService.downloadReceiptPdf(invoice.id)
@@ -352,6 +352,8 @@ export function OrderDetailPage() {
   const payRemaining = invoice
     ? Math.max(Number.parseFloat(invoice.total) - Number.parseFloat(invoice.amount_paid), 0)
     : 0
+
+  const canPrintFinalReceipt = invoice?.payment_status === 'paid'
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-4 md:p-8">
@@ -615,7 +617,7 @@ export function OrderDetailPage() {
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0">
           <CardTitle className="text-base">Invoice &amp; payment</CardTitle>
           <Button variant="outline" size="sm" asChild>
-            <Link to="/billing">Open billing hub</Link>
+            <Link to={invoice ? `/billing?invoice=${invoice.id}&focus=payment` : '/billing'}>Open billing hub</Link>
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -671,15 +673,45 @@ export function OrderDetailPage() {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => void onViewReceiptPdf()}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  disabled={!canPrintFinalReceipt}
+                  title={
+                    canPrintFinalReceipt ? 'View PDF receipt' : 'Record payment in Billing until the balance is zero.'
+                  }
+                  onClick={() => void onViewReceiptPdf()}
+                >
                   <FileText className="size-4" />
                   View receipt PDF
                 </Button>
-                <Button type="button" variant="default" size="sm" className="gap-2" onClick={() => void onPrintReceiptPdf()}>
+                <Button
+                  type="button"
+                  variant="default"
+                  size="sm"
+                  className="gap-2"
+                  disabled={!canPrintFinalReceipt}
+                  title={
+                    canPrintFinalReceipt ? 'Print receipt' : 'Record payment in Billing until the balance is zero.'
+                  }
+                  onClick={() => void onPrintReceiptPdf()}
+                >
                   <Printer className="size-4" />
                   Print receipt
                 </Button>
+                {!canPrintFinalReceipt && invoice ? (
+                  <Button variant="secondary" size="sm" asChild>
+                    <Link to={`/billing?invoice=${invoice.id}&focus=payment`}>Go to payment</Link>
+                  </Button>
+                ) : null}
               </div>
+              {!canPrintFinalReceipt && invoice ? (
+                <p className="text-xs text-muted-foreground">
+                  Final receipt PDF is available after the invoice is fully paid. Use Go to payment to open Billing.
+                </p>
+              ) : null}
 
               {invoice.payments.length > 0 ? (
                 <div>

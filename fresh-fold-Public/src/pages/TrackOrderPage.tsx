@@ -142,7 +142,7 @@ export default function TrackOrderPage() {
                 <p className="track-order-id">Order ID: #{data.order_number}</p>
               </div>
               <div className="track-title-actions">
-                {data.invoice ? (
+                {data.invoice && data.invoice.payment_status === 'paid' ? (
                   <a
                     className="secondary-button track-btn-icon"
                     href={invoiceUrl}
@@ -152,7 +152,16 @@ export default function TrackOrderPage() {
                     <FileText size={18} /> View Invoice
                   </a>
                 ) : (
-                  <button type="button" className="secondary-button track-btn-icon" disabled title="Not available yet">
+                  <button
+                    type="button"
+                    className="secondary-button track-btn-icon"
+                    disabled
+                    title={
+                      data.invoice
+                        ? 'Invoice will be available after payment is complete.'
+                        : 'Not available yet'
+                    }
+                  >
                     <FileText size={18} /> View Invoice
                   </button>
                 )}

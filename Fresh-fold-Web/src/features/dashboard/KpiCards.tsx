@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { AlertTriangle, CreditCard, Package, TrendingUp, Truck } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 import type {
   DashboardStats,
@@ -82,9 +83,17 @@ export function KpiCards({
           <p className="mt-3 text-2xl font-bold tracking-tight">{formatCurrency(latestRevenue)}</p>
           <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
             <TrendingUp className="size-3.5 text-primary" />
-            {revenueDelta === null
-              ? `Outstanding ${formatCurrency(financial.outstanding_invoice_total)}`
-              : `${revenueDelta >= 0 ? '+' : ''}${revenueDelta}% vs previous day`}
+            {revenueDelta === null ? (
+              parseMoney(financial.outstanding_invoice_total) > 0 ? (
+                <Link to="/billing?payment_status=unpaid&focus=payment" className="text-primary hover:underline">
+                  Outstanding {formatCurrency(financial.outstanding_invoice_total)} — collect payment
+                </Link>
+              ) : (
+                <span>Outstanding {formatCurrency(financial.outstanding_invoice_total)}</span>
+              )
+            ) : (
+              `${revenueDelta >= 0 ? '+' : ''}${revenueDelta}% vs previous day`
+            )}
           </p>
         </Card>
       </motion.div>

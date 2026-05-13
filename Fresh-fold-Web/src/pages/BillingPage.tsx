@@ -10,7 +10,7 @@ import {
   Wallet,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 
 import { ApiError } from '@/api/client'
 import * as billingService from '@/api/services/billingService'
@@ -65,7 +65,12 @@ function parseAmount(value: string): number {
   return Number.isFinite(parsed) ? parsed : 0
 }
 
+function isFullyPaidInvoice(status: string): boolean {
+  return status === 'paid'
+}
+
 export function BillingPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [allInvoices, setAllInvoices] = useState<Invoice[]>([])
   const [orders, setOrders] = useState<Order[]>([])
@@ -161,6 +166,43 @@ export function BillingPage() {
   }, [allInvoices, invoices, selectedInvoiceId])
 
   useEffect(() => {
+    if (loading || allInvoices.length === 0) return
+    const ps = searchParams.get('payment_status')
+    const idRaw = searchParams.get('invoice')
+    const focus = searchParams.get('focus')
+    if (!ps && !idRaw) return
+
+    const next = new URLSearchParams(searchParams)
+    let dirty = false
+
+    if (ps === 'unpaid' || ps === 'partial' || ps === 'paid') {
+      setPaymentStatus(ps)
+      next.delete('payment_status')
+      dirty = true
+    }
+
+    if (idRaw) {
+      const id = Number.parseInt(idRaw, 10)
+      const idOk = Number.isFinite(id) && allInvoices.some((inv) => inv.id === id)
+      if (idOk) {
+        setSelectedInvoiceId(id)
+        if (focus === 'payment') {
+          window.setTimeout(() => {
+            document.getElementById('billing-record-payment')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }, 120)
+        }
+      }
+      next.delete('invoice')
+      next.delete('focus')
+      dirty = true
+    }
+
+    if (dirty) {
+      setSearchParams(next, { replace: true })
+    }
+  }, [loading, allInvoices, searchParams, setSearchParams])
+
+  useEffect(() => {
     if (!selectedInvoice) {
       setPaymentAmount('')
       return
@@ -224,6 +266,13 @@ export function BillingPage() {
   }
 
   async function openReceipt(invoiceId: number, mode: 'print' | 'view') {
+    const inv = allInvoices.find((i) => i.id === invoiceId) ?? invoices.find((i) => i.id === invoiceId)
+    if (inv && !isFullyPaidInvoice(inv.payment_status)) {
+      setError(
+        'A printable receipt is available after the invoice is fully paid. Use Collect payment or the payment panel below.',
+      )
+      return
+    }
     try {
       const blob = await billingService.downloadReceiptPdf(invoiceId)
       if (mode === 'print') {
@@ -234,6 +283,13 @@ export function BillingPage() {
     } catch (e) {
       setError(e instanceof ApiError ? e.message : 'Could not open receipt PDF')
     }
+  }
+
+  function scrollToRecordPayment(invoiceId: number) {
+    setSelectedInvoiceId(invoiceId)
+    window.setTimeout(() => {
+      document.getElementById('billing-record-payment')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 50)
   }
 
   function emailInvoice(invoice: Invoice) {
@@ -354,16 +410,23 @@ export function BillingPage() {
             <Wallet className="size-5 text-primary" />
           </div>
         </Card>
-        <Card className="border-border/80 p-5">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Unpaid / Pending</p>
-              <p className="mt-2 text-3xl font-bold tracking-tight">{formatCurrency(metrics.outstanding)}</p>
-              <p className="mt-1 text-xs text-amber-700">{metrics.pendingCount} invoices need follow-up</p>
+        <Link
+          to="/billing?payment_status=unpaid&focus=payment"
+          className="block rounded-xl ring-offset-background transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <Card className="h-full border-border/80 p-5 transition-colors hover:border-amber-600/40">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Unpaid / Pending</p>
+                <p className="mt-2 text-3xl font-bold tracking-tight">{formatCurrency(metrics.outstanding)}</p>
+                <p className="mt-1 text-xs text-amber-800">
+                  {metrics.pendingCount} invoice{metrics.pendingCount === 1 ? '' : 's'} · Tap to open payment
+                </p>
+              </div>
+              <FileText className="size-5 text-amber-700" />
             </div>
-            <FileText className="size-5 text-amber-700" />
-          </div>
-        </Card>
+          </Card>
+        </Link>
         <Card className="border-border/80 p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -413,7 +476,13 @@ export function BillingPage() {
                           <TableRow
                             key={invoice.id}
                             className={cn('group cursor-pointer', selectedInvoice?.id === invoice.id && 'bg-primary/5')}
-                            onClick={() => setSelectedInvoiceId(invoice.id)}
+                            onClick={() => {
+                              if (!isFullyPaidInvoice(invoice.payment_status)) {
+                                scrollToRecordPayment(invoice.id)
+                              } else {
+                                setSelectedInvoiceId(invoice.id)
+                              }
+                            }}
                           >
                             <TableCell className="pl-5 font-medium">{invoice.invoice_number}</TableCell>
                             <TableCell>
@@ -433,7 +502,13 @@ export function BillingPage() {
                               <div className="flex justify-end gap-1 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
                                 <button
                                   type="button"
-                                  className="rounded p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                                  className="rounded p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-35"
+                                  disabled={!isFullyPaidInvoice(invoice.payment_status)}
+                                  title={
+                                    isFullyPaidInvoice(invoice.payment_status)
+                                      ? 'View PDF receipt'
+                                      : 'Available after invoice is fully paid'
+                                  }
                                   onClick={(event) => {
                                     event.stopPropagation()
                                     void openReceipt(invoice.id, 'view')
@@ -444,7 +519,13 @@ export function BillingPage() {
                                 </button>
                                 <button
                                   type="button"
-                                  className="rounded p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                                  className="rounded p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-35"
+                                  disabled={!isFullyPaidInvoice(invoice.payment_status)}
+                                  title={
+                                    isFullyPaidInvoice(invoice.payment_status)
+                                      ? 'Print receipt'
+                                      : 'Available after invoice is fully paid'
+                                  }
                                   onClick={(event) => {
                                     event.stopPropagation()
                                     void openReceipt(invoice.id, 'print')
@@ -464,8 +545,20 @@ export function BillingPage() {
                                 >
                                   <Mail className="size-4" />
                                 </button>
+                                {!isFullyPaidInvoice(invoice.payment_status) ? (
+                                  <Button variant="link" asChild className="px-0">
+                                    <Link
+                                      to={`/billing?invoice=${invoice.id}&focus=payment`}
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      Collect
+                                    </Link>
+                                  </Button>
+                                ) : null}
                                 <Button variant="link" asChild className="px-0">
-                                  <Link to={`/orders/${invoice.order}`}>View</Link>
+                                  <Link to={`/orders/${invoice.order}`} onClick={(e) => e.stopPropagation()}>
+                                    Order
+                                  </Link>
                                 </Button>
                               </div>
                             </TableCell>
@@ -621,8 +714,11 @@ export function BillingPage() {
                 {submitting ? 'Generating…' : 'Generate Invoice'}
               </Button>
 
-              <div className="border-t pt-4">
+              <div className="border-t pt-4" id="billing-record-payment">
                 <p className="text-sm font-semibold">Record Payment</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Unpaid and partial invoices must be settled here before view/print receipt is enabled.
+                </p>
                 {selectedInvoice ? (
                   <div className="mt-3 space-y-3">
                     <div className="rounded-lg border bg-muted/20 p-3 text-sm">
