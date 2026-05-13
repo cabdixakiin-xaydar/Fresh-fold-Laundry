@@ -2,7 +2,7 @@ from django.db.models import Q
 from django.utils.dateparse import parse_date
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from billing.models import TaxRate
@@ -11,10 +11,12 @@ from .models import Order, OrderItem, OrderStatus, ServiceType
 from .serializers import (
     OrderItemSerializer,
     OrderSerializer,
+    PublicOrderTrackingSerializer,
     ServiceTypeSerializer,
     WebBookingSerializer,
 )
 from .services import apply_default_tax_from_active_rate, recalculate_order
+from .utils import normalize_order_number
 
 
 class OrderRecalculateTaxSerializer(serializers.Serializer):
@@ -24,6 +26,11 @@ class OrderRecalculateTaxSerializer(serializers.Serializer):
 class ServiceTypeViewSet(viewsets.ModelViewSet):
     queryset = ServiceType.objects.all()
     serializer_class = ServiceTypeSerializer
+
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -119,6 +126,31 @@ class OrderViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         order = serializer.save()
         return Response(serializer.to_representation(order), status=status.HTTP_201_CREATED)
+
+    @action(
+        detail=False,
+        methods=['get'],
+        url_path='track',
+        permission_classes=[AllowAny],
+        authentication_classes=[],
+    )
+    def track(self, request):
+        raw = request.query_params.get('order') or request.query_params.get('order_number')
+        if not raw:
+            return Response(
+                {'detail': 'Missing query parameter "order".'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        key = normalize_order_number(raw)
+        order = (
+            Order.objects.select_related('customer', 'invoice')
+            .prefetch_related('items__service_type')
+            .filter(order_number__iexact=key)
+            .first()
+        )
+        if not order:
+            return Response({'detail': 'Order not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(PublicOrderTrackingSerializer(order).data)
 
 
 class OrderItemViewSet(viewsets.ModelViewSet):

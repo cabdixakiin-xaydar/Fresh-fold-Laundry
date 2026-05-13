@@ -554,3 +554,503 @@ img {
     padding: 72px 0;
   }
 }
+
+/* --- Public booking & order tracking --- */
+
+.booking-main {
+  padding: 28px 0 72px;
+}
+
+.booking-back {
+  margin: 0 0 20px;
+}
+
+.booking-back__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.booking-hero {
+  margin-bottom: 28px;
+}
+
+.booking-title {
+  margin: 0 0 8px;
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  letter-spacing: -0.03em;
+}
+
+.booking-lede {
+  margin: 0;
+  max-width: 640px;
+  color: var(--muted);
+}
+
+.booking-banner {
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.booking-banner--error {
+  background: #fff1f0;
+  color: #9b1c1c;
+  border: 1px solid #ffc9c4;
+}
+
+.booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.booking-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.booking-card h2 {
+  margin: 0 0 18px;
+  font-size: 1.15rem;
+}
+
+.booking-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.booking-card__head h2 {
+  margin: 0;
+}
+
+.booking-add-line {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 12px;
+}
+
+.booking-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.booking-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.booking-field input,
+.booking-field textarea,
+.booking-field select {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+  color: var(--text);
+}
+
+.booking-field--full {
+  grid-column: 1 / -1;
+}
+
+.booking-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.booking-line {
+  display: grid;
+  grid-template-columns: 1fr 140px auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.booking-line__actions {
+  display: flex;
+  align-items: center;
+  padding-bottom: 2px;
+}
+
+.booking-line-remove:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.booking-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.track-page {
+  min-height: 100vh;
+}
+
+.track-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+
+.track-topbar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+}
+
+.track-topbar__icons {
+  display: flex;
+  gap: 8px;
+}
+
+.track-main {
+  padding: 28px 0 72px;
+}
+
+.track-h1 {
+  margin: 0 0 6px;
+  font-size: clamp(1.6rem, 3vw, 2rem);
+  letter-spacing: -0.03em;
+}
+
+.track-order-id {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.track-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.track-title-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.track-btn-icon {
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 12px;
+}
+
+.track-btn-icon:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.track-state {
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.track-state--error {
+  color: #9b1c1c;
+  font-weight: 600;
+}
+
+.track-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.track-card--status {
+  margin-bottom: 28px;
+}
+
+.track-eta-line {
+  margin: 0 0 24px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.track-eta-time {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.track-timeline {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.track-step {
+  text-align: center;
+}
+
+.track-step__icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 10px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border);
+  background: var(--surface-soft);
+  color: var(--muted);
+}
+
+.track-step__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.track-step__label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.track-step__detail {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.track-step--complete .track-step__icon {
+  border-color: rgba(0, 88, 188, 0.35);
+  background: rgba(0, 88, 188, 0.08);
+  color: var(--primary);
+}
+
+.track-step--current .track-step__icon {
+  border-color: var(--primary);
+  background: rgba(0, 88, 188, 0.12);
+  color: var(--primary);
+  box-shadow: 0 8px 20px -12px rgba(0, 88, 188, 0.8);
+}
+
+.track-step--current .track-step__detail {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.track-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.track-section-title {
+  margin: 0 0 16px;
+  font-size: 1.05rem;
+}
+
+.track-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.track-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.track-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.track-table th {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.track-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--surface-strong);
+  vertical-align: top;
+}
+
+.track-table__num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.track-item-name {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.track-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+}
+
+.track-totals {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.track-totals div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.track-totals dt {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.track-totals dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.track-totals__grand dt {
+  color: var(--text);
+  font-weight: 800;
+}
+
+.track-totals__grand dd {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.track-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.track-customer {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.track-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.track-customer-name {
+  margin: 0 0 4px;
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.track-customer-phone {
+  margin: 0 0 4px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.track-muted {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.track-address {
+  margin: 0 0 16px;
+  line-height: 1.55;
+}
+
+.track-callout {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.track-callout p {
+  margin: 0;
+}
+
+@media (max-width: 960px) {
+  .booking-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-line {
+    grid-template-columns: 1fr;
+  }
+
+  .track-timeline {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .track-step {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    text-align: left;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .track-step__icon {
+    margin: 0;
+  }
+
+  .track-columns {
+    grid-template-columns: 1fr;
+  }
+}

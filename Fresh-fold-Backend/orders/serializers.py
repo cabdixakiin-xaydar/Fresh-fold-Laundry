@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from customers.models import Customer
 
-from .models import Order, OrderItem, ServiceType
+from .models import Order, OrderItem, OrderStatus, ServiceType
 from .services import compute_line_total, recalculate_order
 
 
@@ -189,7 +189,173 @@ class WebBookingSerializer(serializers.Serializer):
                 line_total=Decimal('0'),
             )
         recalculate_order(order)
+        from billing.models import TaxRate
+
+        from .services import apply_default_tax_from_active_rate
+
+        rate = TaxRate.objects.filter(active=True).order_by('-id').first()
+        if rate:
+            apply_default_tax_from_active_rate(order, rate.rate_percent)
+            order.refresh_from_db()
         return order
 
     def to_representation(self, instance):
         return OrderSerializer(instance, context=self.context).data
+
+
+class PublicOrderTrackingSerializer(serializers.ModelSerializer):
+    """Anonymous customer-facing order summary for /orders/track/."""
+
+    customer_name = serializers.CharField(source='customer.name', read_only=True)
+    customer_phone = serializers.CharField(source='customer.phone', read_only=True)
+    customer_email = serializers.CharField(source='customer.email', read_only=True)
+    customer_address = serializers.CharField(source='customer.address', read_only=True)
+    items = serializers.SerializerMethodField()
+    invoice = serializers.SerializerMethodField()
+    estimated_completion = serializers.SerializerMethodField()
+    tax_percent_display = serializers.SerializerMethodField()
+    timeline = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        fields = (
+            'order_number',
+            'status',
+            'subtotal',
+            'discount_amount',
+            'tax_amount',
+            'total',
+            'special_instructions',
+            'customer_name',
+            'customer_phone',
+            'customer_email',
+            'customer_address',
+            'items',
+            'invoice',
+            'estimated_completion',
+            'tax_percent_display',
+            'timeline',
+            'created_at',
+            'updated_at',
+        )
+
+    def get_items(self, obj):
+        rows = []
+        for item in obj.items.select_related('service_type').all():
+            st = item.service_type
+            if st.pricing_unit == 'kg':
+                w = item.weight_kg
+                qty_label = f'{w} lb' if w is not None else ''
+            else:
+                q = item.quantity
+                qty_label = f'{q} item' if q == 1 else f'{q} items'
+            code_lower = (st.code or '').lower()
+            name_lower = st.name.lower()
+            delicate = 'dry' in code_lower or 'delicate' in name_lower or 'dry clean' in name_lower
+            rows.append(
+                {
+                    'category': st.name,
+                    'service_label': st.name,
+                    'quantity_label': qty_label,
+                    'line_total': str(item.line_total),
+                    'delicate': delicate,
+                }
+            )
+        return rows
+
+    def get_invoice(self, obj):
+        inv = getattr(obj, 'invoice', None)
+        if not inv:
+            return None
+        return {
+            'id': inv.id,
+            'invoice_number': inv.invoice_number,
+            'payment_status': inv.payment_status,
+        }
+
+    def get_estimated_completion(self, obj):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        if obj.status == OrderStatus.DELIVERED:
+            local = timezone.localtime(obj.updated_at)
+            return {
+                'headline': 'Order delivered',
+                'detail': local.strftime('%b %d, %Y · %I:%M %p'),
+            }
+        eta = obj.created_at + timedelta(hours=8)
+        local_eta = timezone.localtime(eta)
+        return {
+            'headline': f'Estimated completion: {local_eta.strftime("%A, %b %d")}',
+            'detail': local_eta.strftime('%I:%M %p'),
+        }
+
+    def get_tax_percent_display(self, obj):
+        taxable = obj.subtotal - obj.discount_amount
+        if taxable <= 0 or obj.tax_amount <= 0:
+            return None
+        pct = (obj.tax_amount / taxable) * 100
+        return f'{pct:.0f}%'
+
+    def get_timeline(self, obj):
+        """Five-step customer-facing progress (backend has four statuses; delivery stage is synthetic)."""
+
+        from django.utils import timezone
+
+        tz = timezone.get_current_timezone()
+        created = timezone.localtime(obj.created_at, tz)
+        updated = timezone.localtime(obj.updated_at, tz)
+
+        steps_meta = [
+            ('received', 'Received'),
+            ('processing', 'Processing'),
+            ('ready', 'Ready'),
+            ('out_for_delivery', 'Out for Delivery'),
+            ('delivered', 'Delivered'),
+        ]
+
+        status = obj.status
+        if status == OrderStatus.DELIVERED:
+            current_idx = len(steps_meta)
+        elif status == OrderStatus.READY:
+            current_idx = 2
+        elif status == OrderStatus.PROCESSING:
+            current_idx = 1
+        else:
+            current_idx = 0
+
+        steps_out = []
+        for i, (key, label) in enumerate(steps_meta):
+            if current_idx >= len(steps_meta):
+                step_state = 'complete'
+                detail = updated.strftime('%I:%M %p') if i == len(steps_meta) - 1 else (
+                    created.strftime('%I:%M %p') if i == 0 else updated.strftime('%I:%M %p')
+                )
+            elif i < current_idx:
+                step_state = 'complete'
+                detail = created.strftime('%I:%M %p') if i == 0 else updated.strftime('%I:%M %p')
+            elif i == current_idx:
+                step_state = 'current'
+                if key == 'ready':
+                    detail = 'In Progress'
+                elif key == 'processing':
+                    detail = updated.strftime('%I:%M %p')
+                elif key == 'received':
+                    detail = created.strftime('%I:%M %p')
+                else:
+                    detail = updated.strftime('%I:%M %p')
+            else:
+                step_state = 'pending'
+                detail = 'Pending'
+
+            steps_out.append(
+                {
+                    'key': key,
+                    'label': label,
+                    'state': step_state,
+                    'detail': detail,
+                }
+            )
+
+        return {'steps': steps_out}

@@ -1,5 +1,3 @@
-from io import BytesIO
-
 from django.db.models import Q
 from django.utils.dateparse import parse_date
 from django.http import FileResponse
@@ -7,11 +5,11 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import mm
-from reportlab.pdfgen import canvas
+
+from orders.models import Order
 
 from .models import Invoice, Payment, PromoCode, TaxRate
+from .pdf import render_invoice_pdf
 from .serializers import (
     CreateInvoiceFromOrderSerializer,
     InvoiceSerializer,
@@ -81,120 +79,37 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
 class ReceiptPdfPlaceholderView(APIView):
     def get(self, request, invoice_id):
-        invoice = (
-            Invoice.objects.select_related('order', 'order__customer')
-            .prefetch_related('payments', 'order__items__service_type')
-            .filter(pk=invoice_id)
-            .first()
-        )
+        invoice = Invoice.objects.filter(pk=invoice_id).first()
         if not invoice:
             return Response({'detail': 'Invoice not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        buffer = BytesIO()
-        pdf = canvas.Canvas(buffer, pagesize=A4)
-        page_width, page_height = A4
-        left = 18 * mm
-        right = page_width - (18 * mm)
-        y = page_height - (18 * mm)
+        buffer = render_invoice_pdf(invoice)
+        return FileResponse(
+            buffer,
+            as_attachment=False,
+            filename=f'{invoice.invoice_number}.pdf',
+            content_type='application/pdf',
+        )
 
-        def draw_line(label, value, size=10, gap=6 * mm):
-            nonlocal y
-            pdf.setFont('Helvetica-Bold', size)
-            pdf.drawString(left, y, label)
-            pdf.setFont('Helvetica', size)
-            pdf.drawRightString(right, y, value)
-            y -= gap
 
-        pdf.setTitle(f'{invoice.invoice_number}.pdf')
-        pdf.setFont('Helvetica-Bold', 18)
-        pdf.drawString(left, y, 'Fresh-Fold Laundry')
-        y -= 8 * mm
-        pdf.setFont('Helvetica', 10)
-        pdf.drawString(left, y, 'Invoice Receipt')
-        y -= 10 * mm
+class ReceiptPdfByOrderNumberView(APIView):
+    """Public receipt PDF when the customer knows their order number (no auth)."""
 
-        draw_line('Invoice Number', invoice.invoice_number, size=11)
-        draw_line('Issued', invoice.issued_at.strftime('%b %d, %Y %H:%M'))
-        draw_line('Order', invoice.order.order_number)
-        draw_line('Customer', invoice.order.customer.name)
-        y -= 2 * mm
+    authentication_classes = []
+    permission_classes = []
 
-        pdf.setFont('Helvetica-Bold', 11)
-        pdf.drawString(left, y, 'Line Items')
-        y -= 6 * mm
-        pdf.setFont('Helvetica-Bold', 9)
-        pdf.drawString(left, y, 'Service')
-        pdf.drawRightString(right - 32 * mm, y, 'Qty')
-        pdf.drawRightString(right, y, 'Line Total')
-        y -= 4 * mm
-        pdf.line(left, y, right, y)
-        y -= 5 * mm
+    def get(self, request, order_number):
+        from orders.utils import normalize_order_number
 
-        pdf.setFont('Helvetica', 9)
-        for item in invoice.order.items.all():
-            qty_value = str(item.weight_kg or item.quantity)
-            pdf.drawString(left, y, item.service_type.name)
-            pdf.drawRightString(right - 32 * mm, y, qty_value)
-            pdf.drawRightString(right, y, f'${item.line_total}')
-            y -= 5 * mm
-            if y < 50 * mm:
-                pdf.showPage()
-                y = page_height - (18 * mm)
-                pdf.setFont('Helvetica-Bold', 11)
-                pdf.drawString(left, y, f'Invoice Receipt Continued - {invoice.invoice_number}')
-                y -= 8 * mm
-                pdf.setFont('Helvetica-Bold', 9)
-                pdf.drawString(left, y, 'Service')
-                pdf.drawRightString(right - 32 * mm, y, 'Qty')
-                pdf.drawRightString(right, y, 'Line Total')
-                y -= 4 * mm
-                pdf.line(left, y, right, y)
-                y -= 5 * mm
-                pdf.setFont('Helvetica', 9)
+        key = normalize_order_number(order_number)
+        order = Order.objects.select_related('invoice').filter(order_number__iexact=key).first()
+        if not order:
+            return Response({'detail': 'Order not found.'}, status=status.HTTP_404_NOT_FOUND)
+        invoice = getattr(order, 'invoice', None)
+        if not invoice:
+            return Response({'detail': 'No invoice available for this order yet.'}, status=status.HTTP_404_NOT_FOUND)
 
-        y -= 2 * mm
-        pdf.line(left, y, right, y)
-        y -= 7 * mm
-
-        draw_line('Subtotal', f'${invoice.subtotal}')
-        draw_line('Tax', f'${invoice.tax_amount}')
-        draw_line('Discount', f'-${invoice.discount_amount}')
-        pdf.setFont('Helvetica-Bold', 11)
-        pdf.drawString(left, y, 'Total Due')
-        pdf.drawRightString(right, y, f'${invoice.total}')
-        y -= 8 * mm
-        pdf.setFont('Helvetica', 10)
-        pdf.drawString(left, y, f'Amount Paid: ${invoice.amount_paid}')
-        y -= 6 * mm
-        pdf.drawString(left, y, f'Payment Status: {invoice.payment_status.title()}')
-        y -= 8 * mm
-
-        pdf.setFont('Helvetica-Bold', 11)
-        pdf.drawString(left, y, 'Payments')
-        y -= 6 * mm
-        pdf.setFont('Helvetica', 9)
-        if invoice.payments.exists():
-            for payment in invoice.payments.all():
-                pdf.drawString(left, y, payment.paid_at.strftime('%b %d, %Y'))
-                pdf.drawString(left + 40 * mm, y, payment.get_method_display())
-                pdf.drawRightString(right, y, f'${payment.amount}')
-                y -= 5 * mm
-        else:
-            pdf.drawString(left, y, 'No payments recorded yet.')
-            y -= 5 * mm
-
-        if invoice.notes:
-            y -= 4 * mm
-            pdf.setFont('Helvetica-Bold', 11)
-            pdf.drawString(left, y, 'Notes')
-            y -= 6 * mm
-            pdf.setFont('Helvetica', 9)
-            for line in invoice.notes.splitlines():
-                pdf.drawString(left, y, line[:110])
-                y -= 5 * mm
-
-        pdf.save()
-        buffer.seek(0)
+        buffer = render_invoice_pdf(invoice)
         return FileResponse(
             buffer,
             as_attachment=False,
