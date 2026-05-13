@@ -52,6 +52,9 @@ class InvoiceViewSet(viewsets.ModelViewSet):
             parsed_date = parse_date(issued_date)
             if parsed_date:
                 qs = qs.filter(issued_at__date=parsed_date)
+        order_id = self.request.query_params.get('order')
+        if order_id:
+            qs = qs.filter(order_id=order_id)
         return qs
 
     @action(detail=False, methods=['post'], url_path='from-order')

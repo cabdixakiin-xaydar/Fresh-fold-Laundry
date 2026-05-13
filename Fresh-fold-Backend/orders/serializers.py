@@ -1,11 +1,39 @@
 from decimal import Decimal
 
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
+from billing.models import Invoice, Payment
 from customers.models import Customer
 
 from .models import Order, OrderItem, OrderStatus, ServiceType
 from .services import compute_line_total, recalculate_order
+
+
+class OrderPaymentNestedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ('id', 'amount', 'method', 'reference', 'paid_at')
+
+
+class OrderInvoiceNestedSerializer(serializers.ModelSerializer):
+    payments = OrderPaymentNestedSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Invoice
+        fields = (
+            'id',
+            'invoice_number',
+            'issued_at',
+            'payment_status',
+            'subtotal',
+            'tax_amount',
+            'discount_amount',
+            'total',
+            'amount_paid',
+            'notes',
+            'payments',
+        )
 
 
 class ServiceTypeSerializer(serializers.ModelSerializer):
@@ -84,6 +112,7 @@ class OrderSerializer(serializers.ModelSerializer):
     customer_email = serializers.CharField(source='customer.email', read_only=True)
     customer_address = serializers.CharField(source='customer.address', read_only=True)
     source = serializers.SerializerMethodField()
+    invoice = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
@@ -105,6 +134,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'total',
             'created_by',
             'items',
+            'invoice',
             'created_at',
             'updated_at',
         )
@@ -120,6 +150,13 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_source(self, obj):
         return 'in_store' if obj.created_by_id else 'web'
+
+    def get_invoice(self, obj):
+        try:
+            inv = obj.invoice
+        except ObjectDoesNotExist:
+            return None
+        return OrderInvoiceNestedSerializer(inv, context=self.context).data
 
     def create(self, validated_data):
         items_data = validated_data.pop('items', [])

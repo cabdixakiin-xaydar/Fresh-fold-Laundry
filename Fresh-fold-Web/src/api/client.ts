@@ -41,8 +41,23 @@ function parseErrorMessage(body: unknown, status: string): string {
   if (body && typeof body === 'object') {
     const o = body as Record<string, unknown>
     if (typeof o.detail === 'string') return o.detail
+    if (Array.isArray(o.detail) && o.detail.length > 0) {
+      return o.detail.map((x) => (typeof x === 'string' ? x : JSON.stringify(x))).join(' ')
+    }
     if (Array.isArray(o.non_field_errors) && typeof o.non_field_errors[0] === 'string') {
       return o.non_field_errors[0]
+    }
+    const fieldParts: string[] = []
+    for (const [key, value] of Object.entries(o)) {
+      if (key === 'detail' || key === 'non_field_errors') continue
+      if (typeof value === 'string') {
+        fieldParts.push(`${key}: ${value}`)
+      } else if (Array.isArray(value)) {
+        fieldParts.push(`${key}: ${value.map((v) => (typeof v === 'string' ? v : JSON.stringify(v))).join(', ')}`)
+      }
+    }
+    if (fieldParts.length > 0) {
+      return fieldParts.join(' ')
     }
   }
   return status || 'Request failed'

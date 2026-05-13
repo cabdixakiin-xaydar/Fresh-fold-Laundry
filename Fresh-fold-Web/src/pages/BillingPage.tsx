@@ -17,6 +17,7 @@ import * as billingService from '@/api/services/billingService'
 import * as orderService from '@/api/services/orderService'
 import type { Invoice, Order } from '@/api/types'
 import { formatCurrency } from '@/lib/formatters'
+import { openReceiptPdfInNewTab, printReceiptPdf } from '@/lib/receiptPdf'
 import { cn } from '@/lib/utils'
 
 import { Badge } from '@/components/ui/badge'
@@ -222,18 +223,15 @@ export function BillingPage() {
     URL.revokeObjectURL(url)
   }
 
-  async function openReceipt(invoiceId: number, targetWindow: Window | null) {
+  async function openReceipt(invoiceId: number, mode: 'print' | 'view') {
     try {
       const blob = await billingService.downloadReceiptPdf(invoiceId)
-      const url = URL.createObjectURL(blob)
-      if (targetWindow) {
-        targetWindow.location.href = url
+      if (mode === 'print') {
+        printReceiptPdf(blob)
       } else {
-        window.open(url, '_blank', 'noopener,noreferrer')
+        openReceiptPdfInNewTab(blob)
       }
-      window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
     } catch (e) {
-      targetWindow?.close()
       setError(e instanceof ApiError ? e.message : 'Could not open receipt PDF')
     }
   }
@@ -438,8 +436,18 @@ export function BillingPage() {
                                   className="rounded p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                                   onClick={(event) => {
                                     event.stopPropagation()
-                                    const receiptWindow = window.open('', '_blank', 'noopener,noreferrer')
-                                    void openReceipt(invoice.id, receiptWindow)
+                                    void openReceipt(invoice.id, 'view')
+                                  }}
+                                  aria-label={`View PDF ${invoice.invoice_number}`}
+                                >
+                                  <FileText className="size-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  className="rounded p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                                  onClick={(event) => {
+                                    event.stopPropagation()
+                                    void openReceipt(invoice.id, 'print')
                                   }}
                                   aria-label={`Print ${invoice.invoice_number}`}
                                 >

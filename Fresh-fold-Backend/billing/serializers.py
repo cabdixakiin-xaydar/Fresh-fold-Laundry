@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from orders.models import Order
+from orders.services import recalculate_order
 
 from .models import Invoice, Payment, PromoCode, TaxRate
 
@@ -53,7 +54,8 @@ class PaymentSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         invoice = attrs.get('invoice')
         amount = attrs.get('amount')
-        if invoice and amount:
+        if invoice and amount is not None:
+            invoice = Invoice.objects.get(pk=invoice.pk)
             remaining = invoice.total - invoice.amount_paid
             if remaining <= 0:
                 raise serializers.ValidationError({'invoice': 'This invoice is already fully paid.'})
@@ -108,12 +110,20 @@ class CreateInvoiceFromOrderSerializer(serializers.Serializer):
     notes = serializers.CharField(required=False, default='')
 
     def create(self, validated_data):
+        from django.core.exceptions import ObjectDoesNotExist
+
         try:
             order = Order.objects.get(pk=validated_data['order_id'])
         except Order.DoesNotExist:
             raise serializers.ValidationError({'order_id': 'Order not found.'})
-        if hasattr(order, 'invoice'):
+        try:
+            order.invoice
+        except ObjectDoesNotExist:
+            pass
+        else:
             raise serializers.ValidationError('An invoice already exists for this order.')
+        recalculate_order(order)
+        order.refresh_from_db()
         promo = None
         pid = validated_data.get('promo_code_id')
         if pid:

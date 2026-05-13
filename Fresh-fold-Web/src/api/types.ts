@@ -68,6 +68,28 @@ export type OrderItem = {
   line_total: string
 }
 
+export type OrderInvoicePaymentRow = {
+  id: number
+  amount: string
+  method: string
+  reference: string
+  paid_at: string
+}
+
+export type OrderInvoiceSummary = {
+  id: number
+  invoice_number: string
+  issued_at: string
+  payment_status: 'unpaid' | 'partial' | 'paid'
+  subtotal: string
+  tax_amount: string
+  discount_amount: string
+  total: string
+  amount_paid: string
+  notes: string
+  payments: OrderInvoicePaymentRow[]
+}
+
 export type Order = {
   id: number
   order_number: string
@@ -86,6 +108,7 @@ export type Order = {
   total: string
   created_by: number | null
   items?: OrderItem[]
+  invoice?: OrderInvoiceSummary | null
   created_at: string
   updated_at: string
 }

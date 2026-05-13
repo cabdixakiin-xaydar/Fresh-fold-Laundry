@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
+import { FileText, Printer } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ApiError } from '@/api/client'
+import * as billingService from '@/api/services/billingService'
 import * as customerService from '@/api/services/customerService'
 import * as orderService from '@/api/services/orderService'
 import type { Customer, Order, ServiceType } from '@/api/types'
 import { formatCurrency, formatShortDate } from '@/lib/formatters'
+import { openReceiptPdfInNewTab, printReceiptPdf } from '@/lib/receiptPdf'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -32,6 +35,17 @@ const emptyNewItem: NewItemDraft = {
   weight_kg: '',
 }
 
+function invoicePaymentBadgeVariant(status: string): 'success' | 'warning' | 'destructive' {
+  switch (status) {
+    case 'paid':
+      return 'success'
+    case 'partial':
+      return 'warning'
+    default:
+      return 'destructive'
+  }
+}
+
 export function OrderDetailPage() {
   const navigate = useNavigate()
   const { id } = useParams()
@@ -51,6 +65,13 @@ export function OrderDetailPage() {
   const [itemActionId, setItemActionId] = useState<number | null>(null)
   const [addingItem, setAddingItem] = useState(false)
   const [deletingOrder, setDeletingOrder] = useState(false)
+  const [invoiceNotes, setInvoiceNotes] = useState('')
+  const [creatingInvoice, setCreatingInvoice] = useState(false)
+  const [payAmount, setPayAmount] = useState('')
+  const [payMethod, setPayMethod] = useState<'cash' | 'card' | 'mobile' | 'other'>('cash')
+  const [payReference, setPayReference] = useState('')
+  const [paySubmitting, setPaySubmitting] = useState(false)
+  const [billingError, setBillingError] = useState<string | null>(null)
 
   const statusOptions = ['received', 'processing', 'ready', 'delivered']
 
@@ -67,6 +88,19 @@ export function OrderDetailPage() {
       return sum + base * Number.parseFloat(draft.quantity || '0')
     }, 0)
   }, [itemDrafts, services])
+
+  const invoice = order?.invoice ?? null
+
+  useEffect(() => {
+    if (!invoice) {
+      setPayAmount('')
+      return
+    }
+    const total = Number.parseFloat(invoice.total)
+    const paid = Number.parseFloat(invoice.amount_paid)
+    const remaining = Math.max((Number.isFinite(total) ? total : 0) - (Number.isFinite(paid) ? paid : 0), 0)
+    setPayAmount(remaining > 0 ? remaining.toFixed(2) : '')
+  }, [invoice?.id, invoice?.total, invoice?.amount_paid])
 
   function syncDrafts(nextOrder: Order) {
     setOrder(nextOrder)
@@ -258,6 +292,66 @@ export function OrderDetailPage() {
       setDeletingOrder(false)
     }
   }
+
+  async function onCreateInvoiceFromOrder() {
+    setCreatingInvoice(true)
+    setBillingError(null)
+    try {
+      await billingService.createInvoiceFromOrder({ order_id: orderId, notes: invoiceNotes || undefined })
+      setInvoiceNotes('')
+      await loadOrderData()
+    } catch (e) {
+      setBillingError(e instanceof ApiError ? e.message : 'Could not create invoice')
+    } finally {
+      setCreatingInvoice(false)
+    }
+  }
+
+  async function onRecordInvoicePayment() {
+    if (!invoice) return
+    setPaySubmitting(true)
+    setBillingError(null)
+    try {
+      await billingService.createPayment({
+        invoice: invoice.id,
+        amount: payAmount,
+        method: payMethod,
+        reference: payReference || undefined,
+      })
+      setPayReference('')
+      await loadOrderData()
+    } catch (e) {
+      setBillingError(e instanceof ApiError ? e.message : 'Could not record payment')
+    } finally {
+      setPaySubmitting(false)
+    }
+  }
+
+  async function onViewReceiptPdf() {
+    if (!invoice) return
+    setBillingError(null)
+    try {
+      const blob = await billingService.downloadReceiptPdf(invoice.id)
+      openReceiptPdfInNewTab(blob)
+    } catch (e) {
+      setBillingError(e instanceof ApiError ? e.message : 'Could not open receipt')
+    }
+  }
+
+  async function onPrintReceiptPdf() {
+    if (!invoice) return
+    setBillingError(null)
+    try {
+      const blob = await billingService.downloadReceiptPdf(invoice.id)
+      printReceiptPdf(blob)
+    } catch (e) {
+      setBillingError(e instanceof ApiError ? e.message : 'Could not print receipt')
+    }
+  }
+
+  const payRemaining = invoice
+    ? Math.max(Number.parseFloat(invoice.total) - Number.parseFloat(invoice.amount_paid), 0)
+    : 0
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-4 md:p-8">
@@ -514,6 +608,144 @@ export function OrderDetailPage() {
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-border/80">
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0">
+          <CardTitle className="text-base">Invoice &amp; payment</CardTitle>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/billing">Open billing hub</Link>
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {billingError ? <p className="text-sm text-destructive">{billingError}</p> : null}
+
+          {!invoice ? (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Generate an invoice from this order&apos;s current totals. You can then record payments and print a PDF
+                receipt.
+              </p>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Invoice notes (optional)</label>
+                <textarea
+                  rows={3}
+                  className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  value={invoiceNotes}
+                  onChange={(event) => setInvoiceNotes(event.target.value)}
+                  placeholder="e.g. corporate PO number, billing contact…"
+                />
+              </div>
+              <Button type="button" disabled={creatingInvoice} onClick={() => void onCreateInvoiceFromOrder()}>
+                {creatingInvoice ? 'Creating…' : 'Generate invoice'}
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="text-sm font-semibold">{invoice.invoice_number}</p>
+                <Badge variant={invoicePaymentBadgeVariant(invoice.payment_status)} className="capitalize">
+                  {invoice.payment_status}
+                </Badge>
+                <span className="text-xs text-muted-foreground">Issued {formatShortDate(invoice.issued_at)}</span>
+              </div>
+              <div className="grid gap-2 text-sm sm:grid-cols-2">
+                <p>
+                  <span className="font-medium text-muted-foreground">Subtotal:</span> {formatCurrency(invoice.subtotal)}
+                </p>
+                <p>
+                  <span className="font-medium text-muted-foreground">Tax:</span> {formatCurrency(invoice.tax_amount)}
+                </p>
+                <p>
+                  <span className="font-medium text-muted-foreground">Discount:</span> −{formatCurrency(invoice.discount_amount)}
+                </p>
+                <p>
+                  <span className="font-medium text-muted-foreground">Total:</span> {formatCurrency(invoice.total)}
+                </p>
+                <p className="sm:col-span-2">
+                  <span className="font-medium text-muted-foreground">Amount paid:</span> {formatCurrency(invoice.amount_paid)}
+                  <span className="text-muted-foreground"> · </span>
+                  <span className="font-medium">Balance: {formatCurrency(payRemaining)}</span>
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => void onViewReceiptPdf()}>
+                  <FileText className="size-4" />
+                  View receipt PDF
+                </Button>
+                <Button type="button" variant="default" size="sm" className="gap-2" onClick={() => void onPrintReceiptPdf()}>
+                  <Printer className="size-4" />
+                  Print receipt
+                </Button>
+              </div>
+
+              {invoice.payments.length > 0 ? (
+                <div>
+                  <p className="mb-2 text-sm font-medium">Payments</p>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>When</TableHead>
+                        <TableHead>Method</TableHead>
+                        <TableHead>Reference</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {invoice.payments.map((row) => (
+                        <TableRow key={row.id}>
+                          <TableCell className="text-muted-foreground">{formatShortDate(row.paid_at)}</TableCell>
+                          <TableCell className="capitalize">{row.method.replace(/_/g, ' ')}</TableCell>
+                          <TableCell>{row.reference || '—'}</TableCell>
+                          <TableCell className="text-right font-medium">{formatCurrency(row.amount)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : null}
+
+              {payRemaining > 0 ? (
+                <div className="rounded-lg border bg-muted/20 p-4">
+                  <p className="text-sm font-semibold">Record payment</p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Amount</label>
+                      <Input type="number" min="0" step="0.01" value={payAmount} onChange={(e) => setPayAmount(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Method</label>
+                      <select
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        value={payMethod}
+                        onChange={(e) => setPayMethod(e.target.value as typeof payMethod)}
+                      >
+                        <option value="cash">Cash</option>
+                        <option value="card">Card</option>
+                        <option value="mobile">Mobile money</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Reference</label>
+                      <Input
+                        value={payReference}
+                        onChange={(e) => setPayReference(e.target.value)}
+                        placeholder="Optional"
+                      />
+                    </div>
+                  </div>
+                  <Button type="button" className="mt-3" disabled={paySubmitting || !payAmount} onClick={() => void onRecordInvoicePayment()}>
+                    {paySubmitting ? 'Saving…' : 'Record payment'}
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">Invoice fully paid.</p>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 

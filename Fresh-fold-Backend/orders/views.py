@@ -34,8 +34,9 @@ class ServiceTypeViewSet(viewsets.ModelViewSet):
 
 
 class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.select_related('customer', 'created_by').prefetch_related(
-        'items__service_type'
+    queryset = Order.objects.select_related('customer', 'created_by', 'invoice').prefetch_related(
+        'items__service_type',
+        'invoice__payments',
     )
     serializer_class = OrderSerializer
 
