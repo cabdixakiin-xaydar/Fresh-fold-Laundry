@@ -12,6 +12,7 @@ import { type FormEvent, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import SiteHeader from '../components/SiteHeader'
+import { appAuthUrl } from '../lib/appUrl'
 import { normalizeOrderNumber } from '../lib/orderId'
 
 type ServiceCard = {
@@ -117,7 +118,13 @@ function Hero() {
               Book Your Pickup
               <ArrowRight size={18} />
             </Link>
-            <a className="secondary-button" href="#pricing">
+            <a className="secondary-button" href={appAuthUrl({ mode: 'login' })}>
+              Sign In
+            </a>
+            <a className="ghost-button" href={appAuthUrl({ mode: 'register', portal: 'customer' })}>
+              Sign Up
+            </a>
+            <a className="ghost-button" href="#pricing">
               <Sparkles size={18} />
               View Pricing
             </a>

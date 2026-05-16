@@ -8,7 +8,15 @@ import type { User } from '../api/types'
 type AuthState = {
   user: User | null
   loading: boolean
-  login: (username: string, password: string) => Promise<void>
+  login: (username: string, password: string) => Promise<User>
+  register: (payload: {
+    email: string
+    password: string
+    first_name?: string
+    last_name?: string
+    phone?: string
+    account_type: 'staff' | 'customer'
+  }) => Promise<User>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
 }
@@ -47,7 +55,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await authService.login(username, password)
     setStoredToken(res.token)
     setUser(res.user)
+    return res.user
   }, [])
+
+  const register = useCallback(
+    async (payload: {
+      email: string
+      password: string
+      first_name?: string
+      last_name?: string
+      phone?: string
+      account_type: 'staff' | 'customer'
+    }) => {
+      const res = await authService.register(payload)
+      setStoredToken(res.token)
+      setUser(res.user)
+      return res.user
+    },
+    [],
+  )
 
   const logout = useCallback(async () => {
     try {
@@ -61,8 +87,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo(
-    () => ({ user, loading, login, logout, refreshUser }),
-    [user, loading, login, logout, refreshUser],
+    () => ({ user, loading, login, register, logout, refreshUser }),
+    [user, loading, login, register, logout, refreshUser],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -1,5 +1,7 @@
-import { Bell, HelpCircle, Search, UserCircle2 } from 'lucide-react'
+import { Bell, HelpCircle, Search } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
+
+import { appAuthUrl } from '../lib/appUrl'
 
 export default function SiteHeader() {
   const { pathname } = useLocation()
@@ -30,6 +32,15 @@ export default function SiteHeader() {
           <button type="button" className="icon-button" aria-label="Search">
             <Search size={18} />
           </button>
+          <a className="ghost-button site-auth-link" href={appAuthUrl({ mode: 'login' })}>
+            Sign In
+          </a>
+          <a
+            className="secondary-button site-auth-link"
+            href={appAuthUrl({ mode: 'register', portal: 'customer' })}
+          >
+            Sign Up
+          </a>
           <Link className="primary-button primary-button--sm" to="/book">
             Book Now
           </Link>
@@ -39,9 +50,6 @@ export default function SiteHeader() {
             </button>
             <button type="button" className="icon-button" aria-label="Help">
               <HelpCircle size={18} />
-            </button>
-            <button type="button" className="icon-button" aria-label="Account">
-              <UserCircle2 size={18} />
             </button>
           </div>
         </div>

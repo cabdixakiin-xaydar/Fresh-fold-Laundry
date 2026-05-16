@@ -167,6 +167,13 @@ img {
   border-radius: 12px;
 }
 
+.site-auth-link {
+  min-height: 42px;
+  padding: 0 14px;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
 .secondary-button,
 .ghost-button {
   background: var(--surface);

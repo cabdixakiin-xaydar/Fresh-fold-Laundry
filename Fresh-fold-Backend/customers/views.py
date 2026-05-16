@@ -1,8 +1,11 @@
 from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from accounts.models import User
 from billing.models import Invoice, Payment
 from orders.models import Order
 
@@ -14,11 +17,27 @@ from .serializers import (
 )
 
 
+class CustomerMeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        if user.role != User.Role.CUSTOMER or not user.customer_profile_id:
+            return Response({'detail': 'No customer profile linked to this account.'}, status=404)
+        customer = Customer.objects.prefetch_related('loyalty_transactions').get(
+            pk=user.customer_profile_id,
+        )
+        return Response(CustomerDetailSerializer(customer).data)
+
+
 class CustomerViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
     def get_queryset(self):
+        user = self.request.user
+        if getattr(user, 'role', None) == User.Role.CUSTOMER and user.customer_profile_id:
+            return Customer.objects.filter(pk=user.customer_profile_id)
         qs = super().get_queryset()
         query = self.request.query_params.get('q')
         tier = self.request.query_params.get('tier')
@@ -38,6 +57,16 @@ class CustomerViewSet(viewsets.ModelViewSet):
         elif tier == 'regular':
             qs = qs.filter(loyalty_points__lt=50)
         return qs
+
+    def create(self, request, *args, **kwargs):
+        if getattr(request.user, 'role', None) == User.Role.CUSTOMER:
+            return Response({'detail': 'Not allowed.'}, status=status.HTTP_403_FORBIDDEN)
+        return super().create(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        if getattr(request.user, 'role', None) == User.Role.CUSTOMER:
+            return Response({'detail': 'Not allowed.'}, status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
 
     def get_serializer_class(self):
         if self.action == 'retrieve':

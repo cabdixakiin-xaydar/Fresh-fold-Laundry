@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from accounts.models import User
 from billing.models import TaxRate
 
 from .models import Order, OrderItem, OrderStatus, ServiceType
@@ -42,6 +43,12 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        user = self.request.user
+        if getattr(user, 'is_authenticated', False) and user.role == User.Role.CUSTOMER:
+            if user.customer_profile_id:
+                qs = qs.filter(customer_id=user.customer_profile_id)
+            else:
+                qs = qs.none()
         status_param = self.request.query_params.get('status')
         customer_id = self.request.query_params.get('customer')
         query = self.request.query_params.get('q')
@@ -66,8 +73,20 @@ class OrderViewSet(viewsets.ModelViewSet):
                 qs = qs.filter(created_at__date=parsed_date)
         return qs.distinct()
 
+    def create(self, request, *args, **kwargs):
+        if getattr(request.user, 'role', None) == User.Role.CUSTOMER:
+            return Response({'detail': 'Not allowed.'}, status=status.HTTP_403_FORBIDDEN)
+        return super().create(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        if getattr(request.user, 'role', None) == User.Role.CUSTOMER:
+            return Response({'detail': 'Not allowed.'}, status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
+
     @action(detail=True, methods=['post'], url_path='recalculate')
     def recalculate_totals(self, request, pk=None):
+        if getattr(request.user, 'role', None) == User.Role.CUSTOMER:
+            return Response({'detail': 'Not allowed.'}, status=status.HTTP_403_FORBIDDEN)
         order = self.get_object()
         recalculate_order(order)
         return Response(OrderSerializer(order).data)

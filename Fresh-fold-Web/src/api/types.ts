@@ -6,6 +6,7 @@ export type User = {
   last_name: string
   role: string
   phone: string
+  customer_id: number | null
   is_active: boolean
   date_joined: string
 }

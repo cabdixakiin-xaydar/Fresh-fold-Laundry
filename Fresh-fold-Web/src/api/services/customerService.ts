@@ -26,6 +26,10 @@ export function getCustomer(id: number): Promise<CustomerDetail> {
   return apiRequest<CustomerDetail>(`customers/${id}/`)
 }
 
+export function getMyCustomerProfile(): Promise<CustomerDetail> {
+  return apiRequest<CustomerDetail>('customers/me/')
+}
+
 export function getCustomerTransactions(id: number): Promise<CustomerTransaction[]> {
   return apiRequest<CustomerTransaction[]>(`customers/${id}/transactions/`)
 }

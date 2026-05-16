@@ -13,19 +13,22 @@ import {
 import { NavLink, Outlet } from 'react-router-dom'
 
 import { useAuth } from '@/auth/AuthContext'
+import { navItemsForRole } from '@/auth/roles'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-const nav = [
-  { to: '/dashboard', label: 'Executive Dashboard', icon: LayoutDashboard },
-  { to: '/orders', label: 'Order Hub', icon: Package },
-  { to: '/customers', label: 'Customer Directory', icon: Users },
-  { to: '/inventory', label: 'Inventory Tracker', icon: Truck },
-  { to: '/billing', label: 'Billing & Invoices', icon: Receipt },
-] as const
+const navIcons = {
+  '/dashboard': LayoutDashboard,
+  '/orders': Package,
+  '/customers': Users,
+  '/inventory': Truck,
+  '/billing': Receipt,
+} as const
 
 export function AppShell() {
   const { user, logout } = useAuth()
+  const nav = navItemsForRole(user?.role ?? 'worker')
+  const canCreateOrder = user?.role === 'admin' || user?.role === 'cashier' || user?.role === 'worker'
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -40,31 +43,36 @@ export function AppShell() {
           </div>
         </div>
 
-        <Button className="mb-4 w-full rounded-lg shadow-sm" asChild>
-          <NavLink to="/orders/new" className="gap-2">
-            <Plus className="size-4" />
-            Create New Order
-          </NavLink>
-        </Button>
+        {canCreateOrder ? (
+          <Button className="mb-4 w-full rounded-lg shadow-sm" asChild>
+            <NavLink to="/orders/new" className="gap-2">
+              <Plus className="size-4" />
+              Create New Order
+            </NavLink>
+          </Button>
+        ) : null}
 
         <nav className="flex flex-1 flex-col gap-1">
-          {nav.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
-                  isActive
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                )
-              }
-            >
-              <item.icon className="size-4" />
-              {item.label}
-            </NavLink>
-          ))}
+          {nav.map((item) => {
+            const Icon = navIcons[item.to as keyof typeof navIcons] ?? Package
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  cn(
+                    'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
+                    isActive
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                  )
+                }
+              >
+                <Icon className="size-4" />
+                {item.label}
+              </NavLink>
+            )
+          })}
         </nav>
 
         <div className="mt-auto space-y-2 border-t pt-3">
