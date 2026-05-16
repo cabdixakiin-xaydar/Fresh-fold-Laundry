@@ -1,11 +1,20 @@
+from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import User
-from .serializers import LoginSerializer, RegisterSerializer, UserSerializer
+from .permissions import IsAppAdmin
+from .serializers import (
+    AdminUserCreateSerializer,
+    AdminUserUpdateSerializer,
+    LoginSerializer,
+    RegisterSerializer,
+    UserDetailSerializer,
+    UserSerializer,
+)
 
 
 class RegisterView(APIView):
@@ -49,6 +58,43 @@ class CurrentUserView(APIView):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all().order_by('username')
+    queryset = User.objects.select_related('customer_profile').all().order_by('-date_joined')
     serializer_class = UserSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAppAdmin]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        role = self.request.query_params.get('role')
+        account_type = self.request.query_params.get('account_type')
+        query = self.request.query_params.get('q')
+        is_active = self.request.query_params.get('is_active')
+
+        if account_type == 'customer':
+            qs = qs.filter(role=User.Role.CUSTOMER)
+        elif account_type == 'staff':
+            qs = qs.exclude(role=User.Role.CUSTOMER)
+
+        if role:
+            qs = qs.filter(role=role)
+
+        if is_active in ('true', 'false'):
+            qs = qs.filter(is_active=is_active == 'true')
+
+        if query:
+            qs = qs.filter(
+                Q(username__icontains=query)
+                | Q(email__icontains=query)
+                | Q(first_name__icontains=query)
+                | Q(last_name__icontains=query)
+                | Q(phone__icontains=query)
+            )
+        return qs
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return UserDetailSerializer
+        if self.action == 'create':
+            return AdminUserCreateSerializer
+        if self.action in ('update', 'partial_update'):
+            return AdminUserUpdateSerializer
+        return UserSerializer

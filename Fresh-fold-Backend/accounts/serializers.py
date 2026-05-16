@@ -8,6 +8,7 @@ from .models import User
 
 class UserSerializer(serializers.ModelSerializer):
     customer_id = serializers.SerializerMethodField()
+    account_type = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -20,15 +21,109 @@ class UserSerializer(serializers.ModelSerializer):
             'role',
             'phone',
             'customer_id',
+            'account_type',
             'is_active',
             'date_joined',
         )
-        read_only_fields = ('id', 'date_joined', 'customer_id')
+        read_only_fields = ('id', 'date_joined', 'customer_id', 'account_type')
 
     def get_customer_id(self, obj):
         if obj.customer_profile_id:
             return obj.customer_profile_id
         return None
+
+    def get_account_type(self, obj):
+        return 'customer' if obj.role == User.Role.CUSTOMER else 'staff'
+
+
+class UserDetailSerializer(UserSerializer):
+    is_staff = serializers.BooleanField(read_only=True)
+    last_login = serializers.DateTimeField(read_only=True)
+    customer_profile = serializers.SerializerMethodField()
+
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + ('is_staff', 'last_login', 'customer_profile')
+        read_only_fields = UserSerializer.Meta.read_only_fields + ('is_staff', 'last_login', 'customer_profile')
+
+    def get_customer_profile(self, obj):
+        profile = getattr(obj, 'customer_profile', None)
+        if not profile:
+            return None
+        return {
+            'id': profile.id,
+            'name': profile.name,
+            'email': profile.email,
+            'phone': profile.phone,
+            'loyalty_points': profile.loyalty_points,
+            'address': profile.address,
+        }
+
+
+class AdminUserCreateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=8)
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'password',
+            'first_name',
+            'last_name',
+            'role',
+            'phone',
+            'is_active',
+        )
+
+    def validate_email(self, value):
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError('An account with this email already exists.')
+        return value
+
+    def validate_username(self, value):
+        if User.objects.filter(username__iexact=value).exists():
+            raise serializers.ValidationError('This username is already taken.')
+        return value
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        role = validated_data.get('role', User.Role.WORKER)
+        user = User(**validated_data)
+        user.set_password(password)
+        if role == User.Role.ADMIN:
+            user.is_staff = True
+        user.save()
+        if role == User.Role.CUSTOMER:
+            name = f'{user.first_name} {user.last_name}'.strip() or user.username
+            customer = Customer.objects.create(
+                name=name,
+                phone=user.phone or '',
+                email=user.email,
+            )
+            user.customer_profile = customer
+            user.save(update_fields=['customer_profile'])
+        return user
+
+
+class AdminUserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'email',
+            'first_name',
+            'last_name',
+            'role',
+            'phone',
+            'is_active',
+        )
+
+    def update(self, instance, validated_data):
+        role = validated_data.get('role', instance.role)
+        user = super().update(instance, validated_data)
+        if role == User.Role.ADMIN:
+            user.is_staff = True
+            user.save(update_fields=['is_staff'])
+        return user
 
 
 class RegisterSerializer(serializers.ModelSerializer):

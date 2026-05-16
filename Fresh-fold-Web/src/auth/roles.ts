@@ -33,14 +33,17 @@ export function navItemsForRole(role: string): NavItem[] {
     case 'admin':
       return [
         { to: '/dashboard', label: 'Executive Dashboard' },
+        { to: '/reports', label: 'Reports & Analytics' },
         { to: '/orders', label: 'Order Hub' },
         { to: '/customers', label: 'Customer Directory' },
+        { to: '/users', label: 'User Management' },
         { to: '/inventory', label: 'Inventory Tracker' },
         { to: '/billing', label: 'Billing & Invoices' },
       ]
     case 'cashier':
       return [
         { to: '/dashboard', label: 'Executive Dashboard' },
+        { to: '/reports', label: 'Reports & Analytics' },
         { to: '/orders', label: 'Order Hub' },
         { to: '/customers', label: 'Customer Directory' },
         { to: '/billing', label: 'Billing & Invoices' },
@@ -69,7 +72,10 @@ export function canAccessPath(role: string, pathname: string): boolean {
     return pathname === '/orders' || /^\/orders\/\d+$/.test(pathname)
   }
   if (role === 'cashier') {
-    return !pathname.startsWith('/inventory')
+    return !pathname.startsWith('/inventory') && !pathname.startsWith('/users')
   }
-  return true
+  if (role === 'admin') {
+    return true
+  }
+  return !pathname.startsWith('/reports') && !pathname.startsWith('/users')
 }

@@ -7,8 +7,22 @@ export type User = {
   role: string
   phone: string
   customer_id: number | null
+  account_type?: 'staff' | 'customer'
   is_active: boolean
   date_joined: string
+}
+
+export type UserDetail = User & {
+  is_staff: boolean
+  last_login: string | null
+  customer_profile: {
+    id: number
+    name: string
+    email: string
+    phone: string
+    loyalty_points: number
+    address: string
+  } | null
 }
 
 export type LoginResponse = {
@@ -147,6 +161,46 @@ export type ServicePopularityRow = {
 export type FinancialSummary = {
   revenue_paid_invoices: string
   outstanding_invoice_total: string
+}
+
+export type OrdersReportResponse = {
+  period: string
+  start_date: string
+  end_date: string
+  series: Array<{ day: string | null; count: number; revenue: string }>
+  by_status: Array<{ status: string; count: number }>
+  summary: {
+    total_orders: number
+    total_revenue: string
+    average_order_value: string
+    express_orders: number
+  }
+}
+
+export type CustomersReportResponse = {
+  period: string
+  start_date: string
+  end_date: string
+  new_customers: number
+  total_customers: number
+  signup_series: Array<{ day: string | null; count: number }>
+  loyalty_tiers: { gold: number; silver: number; regular: number }
+  top_customers: Array<{
+    customer_id: number
+    name: string
+    email: string
+    order_count: number
+    spend: string
+  }>
+}
+
+export type RevenueBreakdownResponse = {
+  period: string
+  start_date: string
+  end_date: string
+  paid_revenue: string
+  by_payment_status: Array<{ payment_status: string; count: number; total: string }>
+  monthly_series: Array<{ month: string | null; count: number; revenue: string }>
 }
 
 export type InventoryItemRow = {

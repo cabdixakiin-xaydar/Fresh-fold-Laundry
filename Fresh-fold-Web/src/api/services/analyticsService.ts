@@ -1,7 +1,10 @@
 import { apiRequest } from '../client'
 import type {
+  CustomersReportResponse,
   DashboardStats,
   FinancialSummary,
+  OrdersReportResponse,
+  RevenueBreakdownResponse,
   SalesReportResponse,
   ServicePopularityRow,
 } from '../types'
@@ -29,4 +32,31 @@ export function fetchServicePopularity(date?: string): Promise<ServicePopularity
 export function fetchFinancialSummary(date?: string): Promise<FinancialSummary> {
   const suffix = date ? `?date=${date}` : ''
   return apiRequest<FinancialSummary>(`analytics/reports/financial/${suffix}`)
+}
+
+export function fetchOrdersReport(
+  period: 'daily' | 'weekly' | 'monthly',
+  date?: string,
+): Promise<OrdersReportResponse> {
+  const query = new URLSearchParams({ period })
+  if (date) query.set('date', date)
+  return apiRequest<OrdersReportResponse>(`analytics/reports/orders/?${query}`)
+}
+
+export function fetchCustomersReport(
+  period: 'daily' | 'weekly' | 'monthly',
+  date?: string,
+): Promise<CustomersReportResponse> {
+  const query = new URLSearchParams({ period })
+  if (date) query.set('date', date)
+  return apiRequest<CustomersReportResponse>(`analytics/reports/customers/?${query}`)
+}
+
+export function fetchRevenueBreakdown(
+  period: 'daily' | 'weekly' | 'monthly',
+  date?: string,
+): Promise<RevenueBreakdownResponse> {
+  const query = new URLSearchParams({ period })
+  if (date) query.set('date', date)
+  return apiRequest<RevenueBreakdownResponse>(`analytics/reports/revenue-breakdown/?${query}`)
 }

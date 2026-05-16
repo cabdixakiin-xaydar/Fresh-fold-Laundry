@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   CircleHelp,
   LayoutDashboard,
   LogOut,
@@ -8,6 +9,7 @@ import {
   Settings,
   Shirt,
   Truck,
+  UserCog,
   Users,
 } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
@@ -19,8 +21,10 @@ import { cn } from '@/lib/utils'
 
 const navIcons = {
   '/dashboard': LayoutDashboard,
+  '/reports': BarChart3,
   '/orders': Package,
   '/customers': Users,
+  '/users': UserCog,
   '/inventory': Truck,
   '/billing': Receipt,
 } as const

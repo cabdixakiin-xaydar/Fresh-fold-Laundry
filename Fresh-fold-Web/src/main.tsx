@@ -16,6 +16,8 @@ import { DashboardPage } from './pages/DashboardPage'
 import { InventoryPage } from './pages/InventoryPage'
 import { OrderDetailPage } from './pages/OrderDetailPage'
 import { OrdersPage } from './pages/OrdersPage'
+import { ReportsPage } from './pages/ReportsPage'
+import { UsersPage } from './pages/UsersPage'
 import './index.css'
 
 const router = createBrowserRouter([
@@ -34,6 +36,8 @@ const router = createBrowserRouter([
       { index: true, element: <HomeRedirect /> },
       { path: 'profile', element: <CustomerProfilePage /> },
       { path: 'dashboard', element: <DashboardPage /> },
+      { path: 'reports', element: <ReportsPage /> },
+      { path: 'users', element: <UsersPage /> },
       { path: 'customers', element: <CustomersPage /> },
       { path: 'inventory', element: <InventoryPage /> },
       { path: 'billing', element: <BillingPage /> },
