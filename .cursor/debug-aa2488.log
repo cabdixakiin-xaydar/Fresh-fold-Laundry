@@ -1,0 +1,4 @@
+{"sessionId":"aa2488","location":"AuthContext.tsx:login","message":"login_api_user","data":{"username":"saller1","role":"worker","account_type":"staff"},"timestamp":1778926422781,"hypothesisId":"C"}
+{"sessionId":"aa2488","location":"AuthPage.tsx:onLogin","message":"login_redirect","data":{"username":"saller1","role":"worker","target":"/orders"},"timestamp":1778926422782,"hypothesisId":"D"}
+{"sessionId":"aa2488","location":"AuthContext.tsx:login","message":"login_api_user","data":{"username":"xamse","role":"admin","account_type":"staff"},"timestamp":1778926467865,"hypothesisId":"C"}
+{"sessionId":"aa2488","location":"AuthPage.tsx:onLogin","message":"login_redirect","data":{"username":"xamse","role":"admin","target":"/dashboard"},"timestamp":1778926467866,"hypothesisId":"D"}

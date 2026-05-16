@@ -1,0 +1,4 @@
+{"sessionId": "aa2488", "location": "accounts/views.py:LoginView.post", "message": "login_user_roles", "data": {"username": "saller1", "db_role": "worker", "effective_role": "worker", "is_superuser": false, "is_staff": false}, "timestamp": 1778926422732, "hypothesisId": "A"}
+{"sessionId": "aa2488", "location": "accounts/views.py:LoginView.post", "message": "login_response_role", "data": {"username": "saller1", "api_role": "worker"}, "timestamp": 1778926422772, "hypothesisId": "B"}
+{"sessionId": "aa2488", "location": "accounts/views.py:LoginView.post", "message": "login_user_roles", "data": {"username": "xamse", "db_role": "admin", "effective_role": "admin", "is_superuser": true, "is_staff": true}, "timestamp": 1778926466813, "hypothesisId": "A"}
+{"sessionId": "aa2488", "location": "accounts/views.py:LoginView.post", "message": "login_response_role", "data": {"username": "xamse", "api_role": "admin"}, "timestamp": 1778926467845, "hypothesisId": "B"}
